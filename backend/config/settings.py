@@ -35,6 +35,14 @@ ALLOWED_HOSTS = [
     "www.seyontouch.in",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://seyontouch.in",
+    "https://www.seyontouch.in",
+]
+
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+
 
 # --- Email (used for admin OTP login codes) --------------------------------
 # If DJANGO_EMAIL_HOST isn't set, falls back to printing emails to the
