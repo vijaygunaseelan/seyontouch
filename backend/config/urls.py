@@ -16,5 +16,8 @@ urlpatterns += [
 
 
 urlpatterns += [
-    re_path(r"^(?!api/|django-admin/).*$", TemplateView.as_view(template_name="index.html")),
+    re_path(
+        r"^(?!api/|django-admin/|assets/).*$",
+        TemplateView.as_view(template_name="index.html"),
+    ),
 ]
