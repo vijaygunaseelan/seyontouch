@@ -1,0 +1,150 @@
+"""
+Django settings for the Seyon Touch store backend.
+"""
+
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load backend/.env automatically (if present) so env vars like
+# RAZORPAY_KEY_ID work whether you start the server via `manage.py
+# runserver`, gunicorn, an IDE's run button, etc. — no manual `export`
+# step needed. override=True so .env is always the source of truth here,
+# even if a stale value was exported in your shell session earlier.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / ".env", override=True)
+except ImportError:
+    pass  # python-dotenv not installed — fall back to real env vars only
+
+# The built React app ends up in ../frontend/dist (sibling of backend/).
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
+FRONTEND_DIST = FRONTEND_DIR / "dist"
+
+# --- Security -----------------------------------------------------------
+# SECURITY WARNING: set a real, secret SECRET_KEY and turn DEBUG off before
+# deploying. These env vars give you a safe default for local development.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-dev-only-change-me-before-deploying",
+)
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if h]
+
+
+# --- Email (used for admin OTP login codes) --------------------------------
+# If DJANGO_EMAIL_HOST isn't set, falls back to printing emails to the
+# console — handy for local dev, but you MUST set real SMTP credentials
+# before deploying, or admins will never receive their login codes.
+if os.environ.get("DJANGO_EMAIL_HOST"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.environ["DJANGO_EMAIL_HOST"]
+    EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "1") == "1"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "Seyon Touch <no-reply@seyontouch.local>")
+
+
+# --- Razorpay payment gateway ---------------------------------------------
+# Set these from your Razorpay dashboard (Settings -> API Keys) so checkout
+# can accept UPI, cards, netbanking, and wallets through Razorpay Checkout,
+# with the payment automatically verified server-side (no more manually
+# marking orders as paid). Leave them blank and checkout shows "payment
+# unavailable" until you configure them.
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+
+
+# --- Applications ---------------------------------------------------------
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "store",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # Lets Django serve the built frontend/dist/index.html directly.
+        "DIRS": [FRONTEND_DIST],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+
+
+# --- Database ---------------------------------------------------------
+# SQLite by default so `manage.py migrate` just works out of the box.
+# For a real deployment, point this at Postgres instead (e.g. via
+# DATABASE_URL + dj-database-url, or fill in the dict below by hand).
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+
+# --- Static & frontend files ---------------------------------------------
+# In production, `npm run build` in frontend/ produces frontend/dist/, and
+# Django serves that build directly: index.html via a template view, and
+# the hashed JS/CSS bundle in dist/assets/ as static files at /assets/.
+
+STATIC_URL = "/assets/"
+STATICFILES_DIRS = [FRONTEND_DIST / "assets"] if (FRONTEND_DIST / "assets").exists() else []
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# --- Django REST Framework -------------------------------------------------
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "UNAUTHENTICATED_USER": None,
+}
