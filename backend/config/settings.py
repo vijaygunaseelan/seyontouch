@@ -30,7 +30,10 @@ SECRET_KEY = os.environ.get(
     "django-insecure-dev-only-change-me-before-deploying",
 )
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if h]
+ALLOWED_HOSTS = [
+    "seyontouch.in",
+    "www.seyontouch.in",
+]
 
 
 # --- Email (used for admin OTP login codes) --------------------------------
