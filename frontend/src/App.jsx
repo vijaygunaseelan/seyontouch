@@ -1116,13 +1116,13 @@ const HERO_SLIDES = [
     eyebrow: "Just landed",
     title: "Fresh off the shelf.",
     text: "New pieces are added to the ledger regularly — check back often to see what's new in stock.",
-    bg: 'url("https://user23766.na.imgto.link/public/20260815/dark-grey-and-red-modern-manager-linkedin-career-page-background-3.avif")',
+    bg: 'url("https://user23766.na.imgto.link/public/20260815/dsc-3279-1.avif")',
   },
   {
     eyebrow: "Handpicked quality",
     title: "Each piece, checked twice.",
     text: "Every product is inspected before it's listed, so what you see in the shop is exactly what arrives.",
-    bg: 'url("https://user23766.na.imgto.link/public/20260815/chatgpt-image-aug-14-2026-05-00-17-pm-1.avif")',
+    bg: 'url("https://user23766.na.imgto.link/public/20260816/dsc-3415-1.avif")',
   },
   {
     eyebrow: "Loyalty pays off",
