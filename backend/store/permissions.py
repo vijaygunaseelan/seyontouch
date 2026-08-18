@@ -1,11 +1,12 @@
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from rest_framework.permissions import BasePermission
 
-# Stateless admin auth: after a successful OTP login (see views.RequestOtpView
-# / VerifyOtpView), the browser gets back a signed, time-limited token
+# Stateless admin auth: after a successful username/password login (see
+# views.AdminLoginView), the browser gets back a signed, time-limited token
 # identifying which staff user logged in. That token must be sent as
-# `Authorization: Bearer <token>` on every admin-only request. No session
-# table needed — the signature + timestamp is enough to trust it.
+# `Authorization: Bearer <token>` on every admin-only request, and acts as
+# the admin's session token. No session table needed — the signature +
+# timestamp is enough to trust it.
 
 TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24  # 24 hours
 _TOKEN_PREFIX = "admin:"

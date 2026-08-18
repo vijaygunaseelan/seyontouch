@@ -108,22 +108,12 @@ export async function markOrderPaid(id, token) {
   return res.json();
 }
 
-export async function requestOtp(username) {
-  const res = await fetch(`${API_BASE}/admin/request-otp/`, {
+export async function adminLogin(username, password) {
+  const res = await fetch(`${API_BASE}/admin/login/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username }),
+    body: JSON.stringify({ username, password }),
   });
-  if (!res.ok) throw new Error(await parseErrorDetail(res, "Couldn't send the login code"));
-  return res.json(); // { detail }
-}
-
-export async function verifyOtp(username, code) {
-  const res = await fetch(`${API_BASE}/admin/verify-otp/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, code }),
-  });
-  if (!res.ok) throw new Error(await parseErrorDetail(res, "Invalid or expired code"));
+  if (!res.ok) throw new Error(await parseErrorDetail(res, "Invalid username or password"));
   return res.json(); // { token }
 }

@@ -1052,7 +1052,7 @@ export default function GeneralStoreApp() {
           <div className="gs-modal">
             <AdminLoginForm
               error={loginError}
-              onLogin={submitAdminLogin}
+              onSubmit={submitAdminLogin}
               onCancel={cancelAdminLogin}
             />
           </div>
@@ -1566,7 +1566,7 @@ function PaymentUnavailableCard({ onBack }) {
   );
 }
 
-function AdminLoginForm({ error, onLogin, onCancel }) {
+function AdminLoginForm({ error, onSubmit, onCancel }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -1575,7 +1575,7 @@ function AdminLoginForm({ error, onLogin, onCancel }) {
     e.preventDefault();
     if (!username.trim() || !password) return;
     setSubmitting(true);
-    await onLogin(username.trim(), password);
+    await onSubmit(username.trim(), password);
     setSubmitting(false);
   }
 

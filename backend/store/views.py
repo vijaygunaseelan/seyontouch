@@ -227,8 +227,11 @@ class RazorpayVerifyView(APIView):
 
 
 class AdminLoginView(APIView):
-    """Admin login: given a username + password, return a signed admin
-    token good for 24 hours. No email/SMTP dependency."""
+    """Admin login: given a username + password, return a signed session
+    token good for 24 hours (see permissions.make_admin_token). The token
+    is stateless — no session table needed — but behaves like a session:
+    the browser sends it back as `Authorization: Bearer <token>` on every
+    admin-only request until it expires or the admin logs out."""
 
     permission_classes = [AllowAny]
 

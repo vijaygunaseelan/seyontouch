@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import models
 
 CATEGORY_CHOICES = [
@@ -84,24 +83,4 @@ class Order(models.Model):
         return self.id
 
 
-class AdminOTP(models.Model):
-    """A one-time login code emailed to an admin (staff) user. Replaces the
-    old shared store password — logging in now means: enter your username,
-    get a 6-digit code by email, enter the code."""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="admin_otps")
-    code = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    used = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def is_valid(self):
-        from django.utils import timezone
-
-        return not self.used and timezone.now() < self.expires_at
-
-    def __str__(self):
-        return f"OTP for {self.user} ({'used' if self.used else 'active'})"
