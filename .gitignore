@@ -1,0 +1,28 @@
+# Environment variables (anywhere in the repo)
+.env
+.env.local
+*.env
+backend/.env
+frontend/.env
+
+# Python (backend)
+__pycache__/
+*.pyc
+venv/
+env/
+*.egg-info/
+
+# Node (frontend)
+node_modules/
+frontend/node_modules/
+dist/
+build/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
