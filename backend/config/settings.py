@@ -48,16 +48,16 @@ SESSION_COOKIE_SECURE = not DEBUG
 # If DJANGO_EMAIL_HOST isn't set, falls back to printing emails to the
 # console — handy for local dev, but you MUST set real SMTP credentials
 # before deploying, or admins will never receive their login codes.
-if os.environ.get("DJANGO_EMAIL_HOST"):
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.environ["DJANGO_EMAIL_HOST"]
-    EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
-    EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
-    EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
-    EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "1") == "1"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "Seyon Touch <no-reply@seyontouch.local>")
+# if os.environ.get("DJANGO_EMAIL_HOST"):
+#     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+#     EMAIL_HOST = os.environ["DJANGO_EMAIL_HOST"]
+#     EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "587"))
+#     EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+#     EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
+#     EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "1") == "1"
+# else:
+#     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_DEFAULT_FROM_EMAIL", "Seyon Touch <no-reply@seyontouch.local>")
 
 
 # --- Razorpay payment gateway ---------------------------------------------
@@ -166,3 +166,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "UNAUTHENTICATED_USER": None,
 }
+
+DJANGO_EMAIL_HOST_USER="seyontouch@gmail.com"
+DJANGO_EMAIL_HOST_PASSWORD="qmmd fiau nbkn nqcs"
+DJANGO_EMAIL_USE_TLS=1
+DJANGO_DEFAULT_FROM_EMAIL="Seyon Touch <seyontouch@gmail.com>"
+DJANGO_EMAIL_HOST="smtp.gmail.com"
+DJANGO_EMAIL_PORT=587
