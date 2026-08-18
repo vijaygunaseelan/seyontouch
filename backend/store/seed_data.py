@@ -59,11 +59,11 @@ SEED_PRODUCTS = [
          price=899, stock=12, sku="GS-CHK-02", image="https://picsum.photos/seed/gschoker2/500/500",
          description="Velvet base choker with a delicate layered chain drop."),
 
-    # Earings
-    dict(id="p_earchain01", name="Gold Earings (Kaan Chain)", category="Earings", listing_type="sale",
+    # Ear Chain
+    dict(id="p_earchain01", name="Gold Ear Chain (Kaan Chain)", category="Ear Chain", listing_type="sale",
          price=549, stock=20, sku="GS-EAR-01", image="https://picsum.photos/seed/gsearchain1/500/500",
          description="Delicate ear-to-hair chain that clips in without piercings."),
-    dict(id="p_earchain02", name="Pearl Drop Earings", category="Earings", listing_type="sale",
+    dict(id="p_earchain02", name="Pearl Drop Ear Chain", category="Ear Chain", listing_type="sale",
          price=649, stock=16, sku="GS-EAR-02", image="https://picsum.photos/seed/gsearchain2/500/500",
-         description="Pearl-drop Earings with a fine gold-tone connector."),
+         description="Pearl-drop ear chain with a fine gold-tone connector."),
 ]

@@ -492,7 +492,7 @@ const CATEGORIES = [
   "Designer Jewelry",
   "Temple Jewels",
   "Chokers",
-  "Earings",
+  "Ear Chain",
 ];
 // The demo catalog now lives server-side (store/seed_data.py) as the
 // single source of truth for both the initial migration and the admin
@@ -1127,13 +1127,13 @@ const HERO_SLIDES = [
     eyebrow: "Just landed",
     title: "Fresh off the shelf.",
     text: "New pieces are added to the ledger regularly — check back often to see what's new in stock.",
-    bg: 'url("https://user23766.na.imgto.link/public/20260815/dsc-3279-1.avif")',
+    bg: 'url("https://user23766.na.imgto.link/public/20260815/dark-grey-and-red-modern-manager-linkedin-career-page-background-3.avif")',
   },
   {
     eyebrow: "Handpicked quality",
     title: "Each piece, checked twice.",
     text: "Every product is inspected before it's listed, so what you see in the shop is exactly what arrives.",
-    bg: 'url("https://user23766.na.imgto.link/public/20260816/dsc-3415-1.avif")',
+    bg: 'url("https://user23766.na.imgto.link/public/20260815/chatgpt-image-aug-14-2026-05-00-17-pm-1.avif")',
   },
   {
     eyebrow: "Loyalty pays off",
@@ -1204,12 +1204,12 @@ function HeroCarousel() {
 // fails to load), the tile falls back to a photo from that category's own
 // products, and finally to a plain icon.
 const CATEGORY_IMAGES = {
-  "Earings": "/categories/DSC_0860.jpg",
-  "Chokers": "/categories/DSC_3440.JPG",
+  "Ear Chain": "/categories/ear-chain.jpg",
+  "Chokers": "/categories/chokers.jpg",
   "Temple Jewels": "/categories/temple-jewels.jpg",
   "Designer Jewelry": "/categories/designer-jewelry.jpg",
   "Hair Accessories": "/categories/hair-accessories.jpg",
-  "Anti-Tarnish Bracelets": "/categories/bracelets.jpg",
+  "Anti-Tarnish Bracelets": "/categories/anti-tarnish-bracelets.jpg",
   "Anti-Tarnish Chains": "/categories/anti-tarnish-chains.jpg",
   "Bangles": "/categories/bangles.jpg",
 };

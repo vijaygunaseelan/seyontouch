@@ -11,7 +11,7 @@ CATEGORY_CHOICES = [
         "Designer Jewelry",
         "Temple Jewels",
         "Chokers",
-        "Earings",
+        "Ear Chain",
     ]
 ]
 
