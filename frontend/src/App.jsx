@@ -827,20 +827,10 @@ export default function GeneralStoreApp() {
     if (!isAdmin) setView("store");
   }
 
-  async function requestAdminOtp(username) {
+  async function submitAdminLogin(username, password) {
     setLoginError("");
     try {
-      const { detail } = await api.requestOtp(username);
-      return { ok: true, detail };
-    } catch (e) {
-      setLoginError(e.message || "Couldn't send the login code");
-      return { ok: false };
-    }
-  }
-
-  async function submitAdminOtp(username, code) {
-    try {
-      const { token } = await api.verifyOtp(username, code);
+      const { token } = await api.adminLogin(username, password);
       sessionStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
       setAdminToken(token);
       setIsAdmin(true);
@@ -848,7 +838,7 @@ export default function GeneralStoreApp() {
       setLoginError("");
       setView("admin");
     } catch (e) {
-      setLoginError(e.message || "Invalid or expired code");
+      setLoginError(e.message || "Invalid username or password");
     }
   }
 
@@ -1062,8 +1052,7 @@ export default function GeneralStoreApp() {
           <div className="gs-modal">
             <AdminLoginForm
               error={loginError}
-              onRequestOtp={requestAdminOtp}
-              onSubmitOtp={submitAdminOtp}
+              onLogin={submitAdminLogin}
               onCancel={cancelAdminLogin}
             />
           </div>
@@ -1577,30 +1566,17 @@ function PaymentUnavailableCard({ onBack }) {
   );
 }
 
-function AdminLoginForm({ error, onRequestOtp, onSubmitOtp, onCancel }) {
-  const [step, setStep] = useState("username"); // "username" | "otp"
+function AdminLoginForm({ error, onLogin, onCancel }) {
   const [username, setUsername] = useState("");
-  const [code, setCode] = useState("");
-  const [sending, setSending] = useState(false);
-  const [info, setInfo] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  async function handleRequestOtp(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!username.trim()) return;
-    setSending(true);
-    setInfo("");
-    const res = await onRequestOtp(username.trim());
-    setSending(false);
-    if (res.ok) {
-      setInfo(res.detail || "Check your email for a login code.");
-      setStep("otp");
-    }
-  }
-
-  function handleVerifyOtp(e) {
-    e.preventDefault();
-    if (!code.trim()) return;
-    onSubmitOtp(username.trim(), code.trim());
+    if (!username.trim() || !password) return;
+    setSubmitting(true);
+    await onLogin(username.trim(), password);
+    setSubmitting(false);
   }
 
   return (
@@ -1609,83 +1585,41 @@ function AdminLoginForm({ error, onRequestOtp, onSubmitOtp, onCancel }) {
         <div className="gs-brandmini"><Lock size={14} /> Admin login</div>
       </div>
       <div className="gs-modal-body">
-        {step === "username" ? (
-          <>
-            <div className="gs-modal-sub" style={{ marginBottom: 16 }}>
-              Enter your admin username. We'll email a one-time login code to
-              the address on file.
+        <form onSubmit={handleSubmit}>
+          <div className="gs-field">
+            <label>Username</label>
+            <input
+              autoFocus
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Admin username"
+            />
+          </div>
+          <div className="gs-field">
+            <label>Password</label>
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+            />
+          </div>
+          {error && (
+            <div style={{ color: "var(--coral)", fontSize: 12.5, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+              <AlertCircle size={13} /> {error}
             </div>
-            <form onSubmit={handleRequestOtp}>
-              <div className="gs-field">
-                <label>Username</label>
-                <input
-                  autoFocus
-                  type="text"
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Admin username"
-                />
-              </div>
-              {error && (
-                <div style={{ color: "var(--coral)", fontSize: 12.5, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                  <AlertCircle size={13} /> {error}
-                </div>
-              )}
-              <button className="gs-paybtn" type="submit" disabled={sending}>
-                {sending ? "Sending…" : "Send login code"}
-              </button>
-              <button type="button" className="gs-cancel" onClick={onCancel}>Cancel</button>
-            </form>
-          </>
-        ) : (
-          <>
-            <div className="gs-modal-sub" style={{ marginBottom: 16 }}>
-              {info}
-            </div>
-            <form onSubmit={handleVerifyOtp}>
-              <div className="gs-field">
-                <label>6-digit code</label>
-                <input
-                  autoFocus
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                  placeholder="000000"
-                />
-              </div>
-              {error && (
-                <div style={{ color: "var(--coral)", fontSize: 12.5, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                  <AlertCircle size={13} /> {error}
-                </div>
-              )}
-              <button className="gs-paybtn" type="submit">Verify &amp; log in</button>
-              <button
-                type="button"
-                className="gs-cancel"
-                onClick={() => { setStep("username"); setCode(""); setInfo(""); }}
-              >
-                Use a different username
-              </button>
-              <button
-                type="button"
-                className="gs-cancel"
-                style={{ marginTop: 6 }}
-                onClick={handleRequestOtp}
-                disabled={sending}
-              >
-                {sending ? "Resending…" : "Resend code"}
-              </button>
-            </form>
-          </>
-        )}
+          )}
+          <button className="gs-paybtn" type="submit" disabled={submitting}>
+            {submitting ? "Logging in…" : "Log in"}
+          </button>
+          <button type="button" className="gs-cancel" onClick={onCancel}>Cancel</button>
+        </form>
       </div>
     </div>
   );
-
 }
 
 function SuccessCard({ order, onDone }) {

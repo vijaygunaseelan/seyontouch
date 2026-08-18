@@ -1,25 +1,16 @@
-import random
-from datetime import timedelta
-
 import razorpay
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from django.db import transaction
-from django.utils import timezone
+from django.contrib.auth import authenticate
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import AdminOTP, Order, Product
+from .models import Order, Product
 from .permissions import IsAdminToken, make_admin_token
 from .pricing import CartError, price_cart
 from .seed_data import SEED_PRODUCTS
 from .serializers import OrderSerializer, OrderStatusUpdateSerializer, ProductSerializer
-
-OTP_TTL_MINUTES = 5
-OTP_LENGTH = 6
 
 
 def razorpay_configured():
@@ -235,74 +226,22 @@ class RazorpayVerifyView(APIView):
         return Response(OrderSerializer(order).data)
 
 
-class RequestOtpView(APIView):
-    """Step 1 of admin login: given a username, email a 6-digit one-time
-    code to that staff user's registered email address."""
+class AdminLoginView(APIView):
+    """Admin login: given a username + password, return a signed admin
+    token good for 24 hours. No email/SMTP dependency."""
 
     permission_classes = [AllowAny]
 
     def post(self, request):
         username = (request.data.get("username") or "").strip()
-        # Always return the same generic response, whether or not the
-        # username exists — avoids leaking which admin accounts are real.
-        generic = Response({"detail": "If that account exists, a login code has been emailed to it."})
+        password = request.data.get("password") or ""
+        invalid = Response({"detail": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not username:
-            return Response({"detail": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not username or not password:
+            return Response({"detail": "Username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        User = get_user_model()
-        try:
-            user = User.objects.get(username=username, is_active=True, is_staff=True)
-        except User.DoesNotExist:
-            return generic
-
-        if not user.email:
-            return generic
-
-        code = f"{random.randint(0, 10 ** OTP_LENGTH - 1):0{OTP_LENGTH}d}"
-        with transaction.atomic():
-            AdminOTP.objects.filter(user=user, used=False).update(used=True)
-            AdminOTP.objects.create(
-                user=user, code=code, expires_at=timezone.now() + timedelta(minutes=OTP_TTL_MINUTES)
-            )
-
-        send_mail(
-            subject="Your Seyon Touch admin login code",
-            message=(
-                f"Your one-time login code is {code}.\n\n"
-                f"It expires in {OTP_TTL_MINUTES} minutes. If you didn't request this, you can ignore this email."
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
-        return generic
-
-
-class VerifyOtpView(APIView):
-    """Step 2 of admin login: given a username + the emailed code, return a
-    signed admin token good for 24 hours."""
-
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = (request.data.get("username") or "").strip()
-        code = (request.data.get("code") or "").strip()
-        invalid = Response({"detail": "Invalid or expired code."}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if not username or not code:
-            return Response({"detail": "Username and code are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        User = get_user_model()
-        try:
-            user = User.objects.get(username=username, is_active=True, is_staff=True)
-            otp = AdminOTP.objects.filter(user=user, code=code, used=False).latest("created_at")
-        except (User.DoesNotExist, AdminOTP.DoesNotExist):
+        user = authenticate(request, username=username, password=password)
+        if user is None or not user.is_active or not user.is_staff:
             return invalid
 
-        if not otp.is_valid():
-            return invalid
-
-        otp.used = True
-        otp.save(update_fields=["used"])
         return Response({"token": make_admin_token(user.username)})
