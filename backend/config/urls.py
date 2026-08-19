@@ -1,23 +1,36 @@
 from django.conf import settings
 from django.contrib import admin
-from django.http import HttpResponse
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
+from django.views.static import serve as static_serve
+import os
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("api/", include("store.urls")),
 ]
 
-
-urlpatterns += [
-    path("favicon.ico", lambda request: HttpResponse(status=204)),
-]
-
+# Serve the actual built static files (favicons, apple-touch-icon,
+# category images, etc.) that live at the root of frontend/dist —
+# NOT the empty-204 stub that was here before.
+FRONTEND_DIST = os.path.join(settings.BASE_DIR, "frontend", "dist")  # adjust path to match your project layout
 
 urlpatterns += [
     re_path(
-        r"^(?!api/|django-admin/|assets/).*$",
+        r"^(?P<path>favicon\.ico|favicon-32\.png|favicon-192\.png|apple-touch-icon\.png)$",
+        static_serve,
+        {"document_root": FRONTEND_DIST},
+    ),
+    re_path(
+        r"^categories/(?P<path>.*)$",
+        static_serve,
+        {"document_root": os.path.join(FRONTEND_DIST, "categories")},
+    ),
+]
+
+urlpatterns += [
+    re_path(
+        r"^(?!api/|django-admin/|assets/|favicon|apple-touch-icon|categories/).*$",
         TemplateView.as_view(template_name="index.html"),
     ),
 ]
