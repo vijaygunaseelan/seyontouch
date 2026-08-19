@@ -6,6 +6,14 @@ class CartError(Exception):
     insufficient stock, or a malformed line item."""
 
 
+# Flat shipping fee (₹) added on top of every order's item subtotal.
+# Keep this in sync with SHIPPING_FEE in frontend/src/App.jsx — that's
+# only what the browser *displays* before checkout; this is what actually
+# gets charged (it's baked into the total this module returns, which is
+# what Order.total and the Razorpay order amount are built from).
+SHIPPING_FEE_RUPEES = 60
+
+
 def price_cart(raw_items):
     """Given the frontend's cart items ([{id, qty, mode, days}, ...]),
     looks up each product server-side and computes the same unit price the
@@ -68,4 +76,8 @@ def price_cart(raw_items):
             "days": days,
         })
 
-    return priced_items, total_rupees * 100  # rupees -> paise
+    # Flat shipping fee is added here (not as a line item in priced_items)
+    # so it's baked into the one authoritative total — the same total that
+    # becomes Order.total and the amount Razorpay actually charges.
+    total_paise = (total_rupees + SHIPPING_FEE_RUPEES) * 100
+    return priced_items, total_paise
