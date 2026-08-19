@@ -3,28 +3,26 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.static import serve as static_serve
-import os
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("api/", include("store.urls")),
 ]
 
-# Serve the actual built static files (favicons, apple-touch-icon,
-# category images, etc.) that live at the root of frontend/dist —
-# NOT the empty-204 stub that was here before.
-FRONTEND_DIST = os.path.join(settings.BASE_DIR, "frontend", "dist")  # adjust path to match your project layout
-
+# Serve the handful of static files that live at the ROOT of frontend/dist
+# (favicons, apple-touch-icon, category thumbnails) — these aren't under
+# /assets/, so Whitenoise's STATICFILES_DIRS doesn't cover them. This
+# replaces the old favicon.ico -> 204 stub, which was silently killing it.
 urlpatterns += [
     re_path(
         r"^(?P<path>favicon\.ico|favicon-32\.png|favicon-192\.png|apple-touch-icon\.png)$",
         static_serve,
-        {"document_root": FRONTEND_DIST},
+        {"document_root": settings.FRONTEND_DIST},
     ),
     re_path(
         r"^categories/(?P<path>.*)$",
         static_serve,
-        {"document_root": os.path.join(FRONTEND_DIST, "categories")},
+        {"document_root": settings.FRONTEND_DIST / "categories"},
     ),
 ]
 
