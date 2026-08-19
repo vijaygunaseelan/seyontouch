@@ -108,10 +108,19 @@ export async function markOrderPaid(id, token) {
   return res.json();
 }
 
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 export async function adminLogin(username, password) {
-  const res = await fetch(`${API_BASE}/admin/login/`, {
+  const res = await fetch("/api/admin/login/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),   // <-- add this
+    },
+    credentials: "include",                     // <-- and this, so the cookie is sent
     body: JSON.stringify({ username, password }),
   });
   if (!res.ok) throw new Error(await parseErrorDetail(res, "Invalid username or password"));
