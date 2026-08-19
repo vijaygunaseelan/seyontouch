@@ -15,7 +15,7 @@ urlpatterns = [
 # replaces the old favicon.ico -> 204 stub, which was silently killing it.
 urlpatterns += [
     re_path(
-        r"^(?P<path>favicon\.ico|favicon-32\.png|favicon-192\.png|apple-touch-icon\.png)$",
+        r"^(?P<path>favicon\.ico|favicon-32\.png|favicon-192\.png|apple-touch-icon1\.png)$",
         static_serve,
         {"document_root": settings.FRONTEND_DIST},
     ),
