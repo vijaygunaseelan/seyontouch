@@ -3,6 +3,7 @@ import {
   ShoppingBag, Plus, Minus, X, Trash2, Settings, Store as StoreIcon,
   Check, Loader2, Package, ArrowLeft, Pencil, ImageOff, ReceiptText,
   Lock, AlertCircle, ChevronLeft, ChevronRight, CalendarDays, RotateCcw, ChevronDown, UploadCloud,
+  Eye, ZoomIn,
 } from "lucide-react";
 import * as api from "./api.js";
 
@@ -185,9 +186,30 @@ const TOKENS = `
   }
   .gs-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(0,0,0,0.28); }
 
-  .gs-card-img-wrap { position: relative; aspect-ratio: 1/1; background: #ddd6c4; overflow: hidden; }
-  .gs-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gs-card-img-wrap { position: relative; aspect-ratio: 1/1; background: #ddd6c4; overflow: hidden; cursor: pointer; }
+  .gs-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s ease; }
+  .gs-card-img-wrap:hover img { transform: scale(1.05); }
   .gs-card-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #a89f88; }
+
+  .gs-card-img-scrim {
+    position: absolute; inset: 0;
+    background: rgba(7,46,78,0);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s ease;
+    pointer-events: none;
+  }
+  .gs-card-img-wrap:hover .gs-card-img-scrim { background: rgba(7,46,78,0.28); }
+  .gs-card-img-quickview {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.94); color: var(--ink);
+    padding: 8px 14px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .2s ease, transform .2s ease;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+  .gs-card-img-wrap:hover .gs-card-img-quickview { opacity: 1; transform: translateY(0); }
 
   .gs-tag {
     position: absolute; top: 12px; right: -6px;
@@ -211,7 +233,8 @@ const TOKENS = `
 
   .gs-card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .gs-card-cat { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-2); }
-  .gs-card-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; }
+  .gs-card-name { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.2; cursor: pointer; }
+  .gs-card-name:hover { color: var(--gold); }
   .gs-card-desc { font-size: 12.5px; color: #6f6a5e; line-height: 1.4; flex: 1; }
   .gs-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 8px; }
   .gs-stock { font-family: var(--font-mono); font-size: 11px; color: #6f6a5e; display: flex; align-items: center; flex-shrink: 0; }
@@ -356,6 +379,49 @@ const TOKENS = `
   .gs-page-num:hover, .gs-page-arrow:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
   .gs-page-num.active { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); font-weight: 700; }
   .gs-page-arrow:disabled { opacity: 0.35; }
+
+  /* ---------- PRODUCT DETAIL / QUICK VIEW MODAL ---------- */
+  .gs-detailoverlay {
+    position: fixed; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .gs-detailcard {
+    width: 100%; max-width: 760px; max-height: 88vh; background: var(--paper); color: var(--ink);
+    border-radius: 14px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    animation: gsPop .18s ease; display: flex; flex-direction: column;
+  }
+  .gs-detailclose {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: rgba(7,46,78,0.75); color: #fff; display: flex; align-items: center; justify-content: center;
+  }
+  .gs-detailclose:hover { background: rgba(7,46,78,0.92); }
+  .gs-detailbody { display: grid; grid-template-columns: 1fr 1fr; overflow-y: auto; }
+  .gs-detailimg-wrap { position: relative; background: #ddd6c4; min-height: 320px; }
+  .gs-detailimg-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gs-detailimg-noimg { width: 100%; height: 100%; min-height: 320px; display: flex; align-items: center; justify-content: center; color: #a89f88; }
+  .gs-detailtag {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--gold); color: var(--gold-ink); font-family: var(--font-mono); font-weight: 700;
+    font-size: 15px; padding: 7px 13px; border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+  .gs-detailinfo { padding: 30px 28px; display: flex; flex-direction: column; }
+  .gs-detailcat { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-2); margin-bottom: 6px; }
+  .gs-detailname { font-family: var(--font-display); font-size: 25px; font-weight: 600; line-height: 1.15; margin-bottom: 10px; }
+  .gs-detailsku { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .gs-detaildesc { font-size: 13.5px; color: #6f6a5e; line-height: 1.6; margin-bottom: 20px; }
+  .gs-detailprice-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .gs-detailprice { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--ink); }
+  .gs-detailprice-alt { font-size: 12.5px; color: var(--green); font-weight: 600; }
+  .gs-detailstock { font-family: var(--font-mono); font-size: 12px; color: #6f6a5e; display: flex; align-items: center; margin: 8px 0 20px; }
+  .gs-detailactions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .gs-detail-rentpicker-days { display: flex; gap: 8px; margin-bottom: 4px; }
+
+  @media (max-width: 640px) {
+    .gs-detailbody { grid-template-columns: 1fr; }
+    .gs-detailimg-wrap, .gs-detailimg-noimg { min-height: 240px; }
+    .gs-detailinfo { padding: 22px 20px 26px; }
+  }
 
   /* ---------- ADMIN ---------- */
   .gs-admin-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; flex-wrap: wrap; gap: 14px; }
@@ -1226,6 +1292,8 @@ function StoreView({ products, onAdd }) {
   const [shopTab, setShopTab] = useState("buy");
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(1);
+  // Product currently open in the quick-view / detail modal, or null when closed.
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   const rentableCount = products.filter((p) => p.listingType === "rent" || p.listingType === "both").length;
   const modeFiltered = products.filter((p) =>
@@ -1300,7 +1368,13 @@ function StoreView({ products, onAdd }) {
         <>
           <div className="gs-grid">
             {pageProducts.map((p) => (
-              <ProductCard key={p.id + "-" + shopTab} product={p} onAdd={onAdd} mode={shopTab} />
+              <ProductCard
+                key={p.id + "-" + shopTab}
+                product={p}
+                onAdd={onAdd}
+                mode={shopTab}
+                onPreview={() => setPreviewProduct(p)}
+              />
             ))}
           </div>
           {totalPages > 1 && (
@@ -1324,13 +1398,25 @@ function StoreView({ products, onAdd }) {
           )}
         </>
       )}
+
+      {previewProduct && (
+        <>
+          <div className="gs-overlay" onClick={() => setPreviewProduct(null)} />
+          <ProductDetailModal
+            product={previewProduct}
+            initialMode={shopTab === "rent" ? "rent" : "sale"}
+            onAdd={onAdd}
+            onClose={() => setPreviewProduct(null)}
+          />
+        </>
+      )}
     </>
   );
 }
 
 const RENT_DURATIONS = [1, 3, 7];
 
-function ProductCard({ product, onAdd, mode }) {
+function ProductCard({ product, onAdd, mode, onPreview }) {
   const [imgError, setImgError] = useState(false);
   const [rentDays, setRentDays] = useState(3);
   const outOfStock = product.stock <= 0;
@@ -1343,12 +1429,22 @@ function ProductCard({ product, onAdd, mode }) {
 
   return (
     <div className="gs-card">
-      <div className="gs-card-img-wrap">
+      <div
+        className="gs-card-img-wrap"
+        onClick={onPreview}
+        role="button"
+        tabIndex={0}
+        aria-label={`View details for ${product.name}`}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPreview(); } }}
+      >
         {!imgError ? (
           <img src={product.image} alt={product.name} onError={() => setImgError(true)} />
         ) : (
           <div className="gs-card-noimg"><ImageOff size={28} /></div>
         )}
+        <div className="gs-card-img-scrim">
+          <div className="gs-card-img-quickview"><Eye size={13} /> Quick view</div>
+        </div>
         <div className="gs-tag">
           {isRentMode ? `${inr(product.rentPrice)}/day` : inr(product.price)}
         </div>
@@ -1356,7 +1452,7 @@ function ProductCard({ product, onAdd, mode }) {
       </div>
       <div className="gs-card-body">
         <div className="gs-card-cat">{product.category}</div>
-        <div className="gs-card-name">{product.name}</div>
+        <div className="gs-card-name" onClick={onPreview}>{product.name}</div>
         <div className="gs-card-desc">{product.description}</div>
         {!isRentMode && product.listingType === "both" && (
           <div className="gs-rentnote">or rent from {inr(product.rentPrice)}/day</div>
@@ -1399,6 +1495,122 @@ function ProductCard({ product, onAdd, mode }) {
             </button>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- PRODUCT DETAIL / QUICK VIEW MODAL ---------------- */
+function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
+  const [imgError, setImgError] = useState(false);
+  const [detailMode, setDetailMode] = useState(
+    product.listingType === "rent" ? "rent" : product.listingType === "both" ? initialMode : "sale"
+  );
+  const [rentDays, setRentDays] = useState(3);
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const outOfStock = product.stock <= 0;
+  const low = product.stock > 0 && product.stock <= 5;
+  const canRent = product.listingType === "rent" || product.listingType === "both";
+  const canSell = (product.listingType || "sale") !== "rent";
+  const isRentMode = detailMode === "rent";
+
+  function handleAdd() {
+    if (isRentMode) {
+      onAdd(product, { mode: "rent", days: rentDays });
+    } else {
+      onAdd(product, { mode: "sale" });
+    }
+    onClose();
+  }
+
+  return (
+    <div className="gs-detailoverlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="gs-detailcard">
+        <button className="gs-detailclose" onClick={onClose} aria-label="Close"><X size={17} /></button>
+        <div className="gs-detailbody">
+          <div className="gs-detailimg-wrap">
+            {!imgError ? (
+              <img src={product.image} alt={product.name} onError={() => setImgError(true)} />
+            ) : (
+              <div className="gs-detailimg-noimg"><ImageOff size={40} /></div>
+            )}
+            <div className="gs-detailtag">
+              {isRentMode ? `${inr(product.rentPrice)}/day` : inr(product.price)}
+            </div>
+          </div>
+          <div className="gs-detailinfo">
+            <div className="gs-detailcat">{product.category}</div>
+            <div className="gs-detailname">{product.name}</div>
+            {product.sku && <div className="gs-detailsku">SKU: {product.sku}</div>}
+            <div className="gs-detaildesc">
+              {product.description || "No description available for this item yet."}
+            </div>
+
+            {canSell && canRent && (
+              <div className="gs-shoptabs" style={{ marginBottom: 4 }}>
+                <button
+                  className={`gs-shoptab ${!isRentMode ? "active" : ""}`}
+                  onClick={() => setDetailMode("sale")}
+                >
+                  <ShoppingBag size={14} /> Buy
+                </button>
+                <button
+                  className={`gs-shoptab ${isRentMode ? "active" : ""}`}
+                  onClick={() => setDetailMode("rent")}
+                >
+                  <CalendarDays size={14} /> Rent
+                </button>
+              </div>
+            )}
+
+            <div className="gs-detailprice-row">
+              <div className="gs-detailprice">
+                {isRentMode ? `${inr(product.rentPrice)} / day` : inr(product.price)}
+              </div>
+              {!isRentMode && product.listingType === "both" && (
+                <div className="gs-detailprice-alt">or rent from {inr(product.rentPrice)}/day</div>
+              )}
+            </div>
+
+            <div className="gs-detailstock">
+              <span className="gs-stockdot" style={{ background: outOfStock ? "#c0392b" : low ? "#E0654F" : "#6B8F71" }} />
+              {outOfStock ? "Out of stock" : low ? `Only ${product.stock} left` : `${product.stock} in stock`}
+            </div>
+
+            <div className="gs-detailactions">
+              {isRentMode && (
+                <div className="gs-rentpicker" style={{ padding: 0 }}>
+                  <div className="gs-rentpicker-label">Rental length</div>
+                  <div className="gs-detail-rentpicker-days">
+                    {RENT_DURATIONS.map((d) => (
+                      <button
+                        key={d}
+                        className={`gs-rentday ${rentDays === d ? "active" : ""}`}
+                        onClick={() => setRentDays(d)}
+                      >
+                        {d} day{d > 1 ? "s" : ""}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="gs-rentpicker-total">
+                    Total: <strong>{inr(product.rentPrice * rentDays)}</strong> for {rentDays} day{rentDays > 1 ? "s" : ""}
+                  </div>
+                </div>
+              )}
+              <button className="gs-addbtn" style={{ justifyContent: "center", padding: "12px 14px" }} disabled={outOfStock} onClick={handleAdd}>
+                <Plus size={14} /> {isRentMode ? `Rent · ${inr(product.rentPrice * rentDays)}` : "Add to basket"}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
