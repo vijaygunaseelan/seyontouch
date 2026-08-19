@@ -151,5 +151,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    # The API is stateless (see store/permissions.py's IsAdminToken) and
+    # never uses Django sessions for auth. Without this, DRF falls back to
+    # its default authentication classes, which include SessionAuthentication.
+    # That class silently kicks in whenever the browser *also* has an
+    # active session cookie from /django-admin/, and then enforces CSRF on
+    # top of the Bearer-token check — which api.js's write calls never
+    # send a CSRF header for. Result: "CSRF Failed: CSRF token missing"
+    # on Save, but only for admins who've ever logged into /django-admin/
+    # in that browser. Setting this to [] removes that fallback entirely.
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
     "UNAUTHENTICATED_USER": None,
 }
