@@ -12,6 +12,12 @@ import * as api from "./api.js";
 // back, not the password itself.
 const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 
+// Flat shipping fee (₹) added on top of the cart subtotal at checkout.
+// Keep this in sync with SHIPPING_FEE_RUPEES in backend/store/pricing.py —
+// that's the value actually charged; this one is just what's displayed
+// before the order is created.
+const SHIPPING_FEE = 60;
+
 /* ---------------------------------------------------------------
    TOKENS
    bg: charcoal ledger backdrop / paper: cream card stock
@@ -855,7 +861,7 @@ export default function GeneralStoreApp() {
       items: cartItems.map((i) => ({
         id: i.id, name: i.name, price: i.unitPrice, qty: i.qty, mode: i.mode, days: i.days,
       })),
-      total: subtotal,
+      total: subtotal + SHIPPING_FEE,
     };
     try {
       const order = await api.createOrder(orderPayload);
@@ -1097,7 +1103,7 @@ export default function GeneralStoreApp() {
             )}
             {checkoutStage === "payment" && razorpayConfig && (
               <RazorpayPaymentCard
-                total={subtotal}
+                total={subtotal + SHIPPING_FEE}
                 onPay={payNow}
                 paying={paying}
                 onBack={backToAddress}
@@ -1659,8 +1665,8 @@ function CartDrawer({ items, subtotal, onClose, onChangeQty, onRemove, onCheckou
       {items.length > 0 && (
         <div className="gs-drawer-foot">
           <div className="gs-totalrow"><span>Subtotal</span><span>{inr(subtotal)}</span></div>
-          <div className="gs-totalrow"><span>Shipping</span><span>Free</span></div>
-          <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal)}</span></div>
+          <div className="gs-totalrow"><span>Shipping</span><span>{inr(SHIPPING_FEE)}</span></div>
+          <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal + SHIPPING_FEE)}</span></div>
           <button className="gs-checkoutbtn" onClick={onCheckout}>
             Proceed to Buy
           </button>
