@@ -145,11 +145,18 @@ class OrderListCreateView(generics.ListCreateAPIView):
             return Response(out, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class OrderDetailView(generics.RetrieveUpdateAPIView):
-    """Admin-only. Used by the admin panel's "Mark as paid" button.
-    Only `status` (and `utr`, if the admin wants to fix it up) can ever be
-    changed here — customer/items/total are permanently fixed at
-    creation time."""
+class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin-only. GET/PATCH used by the admin panel's order list and
+    "Mark as paid" button — only `status` (and `utr`, if the admin wants
+    to fix it up) can ever be changed here; customer/items/total are
+    permanently fixed at creation time.
+
+    DELETE removes an order outright. Restricted to orders still
+    "pending" — a paid order is a real financial record (it's already
+    been charged and counted in analytics), so it can't be deleted, only
+    ever re-marked. Pending orders that never got paid (abandoned
+    checkouts, stale test orders, etc.) are safe to remove from the
+    ledger."""
 
     queryset = Order.objects.all()
     permission_classes = [IsAdminToken]
@@ -165,6 +172,65 @@ class OrderDetailView(generics.RetrieveUpdateAPIView):
         # frontend can just splice this straight back into its order list.
         response.data = OrderSerializer(self.get_object()).data
         return response
+
+    def destroy(self, request, *args, **kwargs):
+        order = self.get_object()
+        if order.status != "pending":
+            return Response(
+                {"detail": "Only pending orders can be deleted."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
+class AdminAnalyticsView(APIView):
+    """Admin-only. Aggregate store performance for the admin panel's
+    Analytics tab. Revenue/profit are computed only from paid orders —
+    pending orders haven't actually brought in any money yet. Profit uses
+    each order item's cost snapshot (see pricing.price_cart), so it stays
+    accurate even if a product's cost price is edited or the product is
+    deleted later."""
+
+    permission_classes = [IsAdminToken]
+
+    def get(self, request):
+        orders = Order.objects.all()
+        total_orders = orders.count()
+        paid_orders = orders.filter(status="paid")
+        pending_orders_count = total_orders - paid_orders.count()
+
+        total_revenue = 0
+        total_cost = 0
+        total_items_sold = 0
+        product_sales = {}  # id -> {"name": ..., "qty": 0, "revenue": 0}
+
+        for order in paid_orders:
+            for item in order.items or []:
+                qty = item.get("qty", 0) or 0
+                price = item.get("price", 0) or 0
+                cost = item.get("cost", 0) or 0
+                total_revenue += price * qty
+                total_cost += cost * qty
+                total_items_sold += qty
+
+                pid = item.get("id")
+                entry = product_sales.setdefault(pid, {"name": item.get("name", pid), "qty": 0, "revenue": 0})
+                entry["qty"] += qty
+                entry["revenue"] += price * qty
+
+        top_products = sorted(product_sales.values(), key=lambda e: e["qty"], reverse=True)[:5]
+
+        return Response({
+            "totalOrders": total_orders,
+            "paidOrders": paid_orders.count(),
+            "pendingOrders": pending_orders_count,
+            "totalItemsSold": total_items_sold,
+            "totalRevenue": total_revenue,
+            "totalCost": total_cost,
+            "totalProfit": total_revenue - total_cost,
+            "averageOrderValue": round(total_revenue / paid_orders.count()) if paid_orders.count() else 0,
+            "topProducts": top_products,
+        })
 
 
 class RazorpayConfigView(APIView):

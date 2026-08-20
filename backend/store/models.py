@@ -31,6 +31,11 @@ class Product(models.Model):
     listing_type = models.CharField(max_length=8, choices=LISTING_TYPE_CHOICES, default="sale")
     price = models.PositiveIntegerField(default=0)
     rent_price = models.PositiveIntegerField(default=0)
+    # What the store paid to acquire/make this item. Optional — defaults to
+    # 0 for products where the owner hasn't filled it in yet, in which
+    # case the admin analytics tab's profit figure will equal revenue for
+    # that item until it's set. Never shown to customers.
+    cost_price = models.PositiveIntegerField(default=0)
     stock = models.PositiveIntegerField(default=0)
     sku = models.CharField(max_length=32, blank=True)
     # Either a plain image URL, or a compressed base64 data: URI produced
@@ -81,6 +86,3 @@ class Order(models.Model):
 
     def __str__(self):
         return self.id
-
-
-

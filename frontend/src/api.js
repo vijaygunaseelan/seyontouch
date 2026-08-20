@@ -108,6 +108,20 @@ export async function markOrderPaid(id, token) {
   return res.json();
 }
 
+export async function deleteOrder(id, token) {
+  const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(id)}/`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error(await parseErrorDetail(res, "Couldn't delete order"));
+}
+
+export async function getAnalytics(token) {
+  const res = await fetch(`${API_BASE}/admin/analytics/`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error(await parseErrorDetail(res, "Couldn't load analytics"));
+  return res.json();
+}
+
 function getCookie(name) {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
   return match ? decodeURIComponent(match[2]) : null;

@@ -6,7 +6,8 @@ import {
   Eye, ZoomIn, Phone, Mail, Instagram,
 } from "lucide-react";
 import * as api from "./api.js";
-import instagramQR from "./assets/adobe-express-qr-code.png";
+import instagramQR from "./assets/instagram-qr.png";
+
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
 // back, not the password itself.
@@ -19,7 +20,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 const SHIPPING_FEE = 60;
 
 // Store contact details shown in the site footer.
-const STORE_PHONE = "+91 9611975252";
+const STORE_PHONE = "7777777777";
 const STORE_EMAIL = "seyontouch@gmail.com";
 const STORE_INSTAGRAM_HANDLE = "seyontouch";
 const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
@@ -515,6 +516,21 @@ const TOKENS = `
     display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 24px rgba(0,0,0,0.4);
   }
 
+  .gs-stats-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+  }
+  .gs-statcard {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px;
+  }
+  .gs-statcard.highlight { border-color: var(--green); background: #eef8f0; }
+  .gs-statcard-label { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px; }
+  .gs-statcard-value { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--ink); }
+  .gs-analytics-hint {
+    display: flex; align-items: flex-start; gap: 8px; margin-top: 16px; padding: 11px 13px;
+    background: #fdf1e0; border: 1px solid rgba(168,106,16,0.25); border-radius: 8px;
+    font-size: 12px; color: #a86a10; line-height: 1.5;
+  }
+
   .gs-footer {
     margin-top: 40px; background: var(--panel); border-top: 1px solid var(--line);
   }
@@ -569,6 +585,7 @@ const TOKENS = `
     .gs-footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 24px; padding: 28px 20px 20px; }
     .gs-footer-col { align-items: center; }
     .gs-footer-tagline { max-width: none; }
+    .gs-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .gs-bottombar {
       display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
       background: var(--paper); border-top: 1px solid var(--line);
@@ -645,7 +662,7 @@ function fileToCompressedDataUrl(file, maxDim = 640, quality = 0.78) {
   });
 }
 function emptyProduct() {
-  return { id: "", name: "", category: CATEGORIES[0], price: "", stock: "", sku: "", image: "", description: "", listingType: "sale", rentPrice: "" };
+  return { id: "", name: "", category: CATEGORIES[0], price: "", stock: "", sku: "", image: "", description: "", listingType: "sale", rentPrice: "", costPrice: "" };
 }
 
 // /admin is its own real URL (not just an in-page toggle): typing it
@@ -968,6 +985,36 @@ export default function GeneralStoreApp() {
     }
   }
 
+  async function deleteOrder(orderId) {
+    const ok = window.confirm(`Delete order ${orderId}? This can't be undone.`);
+    if (!ok) return;
+    try {
+      await api.deleteOrder(orderId, adminToken);
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      showToast("Order deleted");
+    } catch (e) {
+      showToast(e.message || "Couldn't delete order");
+    }
+  }
+
+  // Analytics is fetched lazily, the first time the admin opens that tab
+  // (and again any time an order changes underneath it — mark-paid or
+  // delete — so the numbers don't go stale).
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  async function loadAnalytics() {
+    setAnalyticsLoading(true);
+    try {
+      setAnalytics(await api.getAnalytics(adminToken));
+    } catch (e) {
+      showToast(e.message || "Couldn't load analytics");
+    }
+    setAnalyticsLoading(false);
+  }
+  useEffect(() => {
+    if (isAdmin && adminTab === "analytics") loadAnalytics();
+  }, [isAdmin, adminTab, orders.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function resetCatalog() {
     const ok = window.confirm(
       "This will replace every current product with the demo catalog (including the jewelry rental items). This can't be undone. Continue?"
@@ -999,6 +1046,7 @@ export default function GeneralStoreApp() {
       stock: Number(p.stock) || 0,
       listingType: p.listingType || "sale",
       rentPrice: Number(p.rentPrice) || 0,
+      costPrice: Number(p.costPrice) || 0,
       sku: p.sku || "GS-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
       image: p.image || `https://picsum.photos/seed/${encodeURIComponent(p.name || uid())}/500/500`,
     };
@@ -1088,6 +1136,9 @@ export default function GeneralStoreApp() {
             onLogout={adminLogout}
             onReset={resetCatalog}
             onMarkPaid={markOrderPaid}
+            onDeleteOrder={deleteOrder}
+            analytics={analytics}
+            analyticsLoading={analyticsLoading}
           />
         ) : (
           <div className="gs-emptystate">
@@ -1942,7 +1993,7 @@ function SuccessCard({ order, onDone }) {
 }
 
 /* ---------------- ADMIN ---------------- */
-function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onLogout, onReset, onMarkPaid }) {
+function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onLogout, onReset, onMarkPaid, onDeleteOrder, analytics, analyticsLoading }) {
   const [expandedOrder, setExpandedOrder] = useState(null);
   return (
     <>
@@ -1962,6 +2013,9 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
         </button>
         <button className={`gs-tab ${adminTab === "orders" ? "active" : ""}`} onClick={() => setAdminTab("orders")}>
           Orders ({orders.length})
+        </button>
+        <button className={`gs-tab ${adminTab === "analytics" ? "active" : ""}`} onClick={() => setAdminTab("analytics")}>
+          Analytics
         </button>
       </div>
 
@@ -1996,7 +2050,7 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
             ))
           )}
         </div>
-      ) : (
+      ) : adminTab === "orders" ? (
         <div className="gs-table-wrap">
           {orders.length === 0 ? (
             <div className="gs-emptystate">
@@ -2005,16 +2059,83 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
             </div>
           ) : (
             orders.map((o) => (
-              <OrderRow key={o.id} order={o} expanded={expandedOrder === o.id} onToggle={() => setExpandedOrder(expandedOrder === o.id ? null : o.id)} onMarkPaid={onMarkPaid} />
+              <OrderRow
+                key={o.id}
+                order={o}
+                expanded={expandedOrder === o.id}
+                onToggle={() => setExpandedOrder(expandedOrder === o.id ? null : o.id)}
+                onMarkPaid={onMarkPaid}
+                onDelete={onDeleteOrder}
+              />
             ))
           )}
         </div>
+      ) : (
+        <AnalyticsPanel analytics={analytics} loading={analyticsLoading} />
       )}
     </>
   );
 }
 
-function OrderRow({ order, expanded, onToggle, onMarkPaid }) {
+function AnalyticsPanel({ analytics, loading }) {
+  if (loading && !analytics) {
+    return (
+      <div className="gs-emptystate">
+        <Loader2 size={22} className="gs-spin" style={{ marginBottom: 10 }} />
+        <div>Loading analytics…</div>
+      </div>
+    );
+  }
+  if (!analytics) return null;
+
+  const stats = [
+    { label: "Total orders", value: analytics.totalOrders },
+    { label: "Paid orders", value: analytics.paidOrders },
+    { label: "Pending orders", value: analytics.pendingOrders },
+    { label: "Items sold", value: analytics.totalItemsSold },
+    { label: "Revenue", value: inr(analytics.totalRevenue) },
+    { label: "Cost", value: inr(analytics.totalCost) },
+    { label: "Profit", value: inr(analytics.totalProfit), highlight: true },
+    { label: "Avg. order value", value: inr(analytics.averageOrderValue) },
+  ];
+
+  return (
+    <div>
+      <div className="gs-stats-grid">
+        {stats.map((s) => (
+          <div className={`gs-statcard ${s.highlight ? "highlight" : ""}`} key={s.label}>
+            <div className="gs-statcard-label">{s.label}</div>
+            <div className="gs-statcard-value">{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {analytics.totalCost === 0 && analytics.totalRevenue > 0 && (
+        <div className="gs-analytics-hint">
+          <AlertCircle size={13} /> Profit currently equals revenue because no product has a "Cost price" set yet —
+          add one when editing a product to see real profit here.
+        </div>
+      )}
+
+      {analytics.topProducts && analytics.topProducts.length > 0 && (
+        <div className="gs-table-wrap" style={{ marginTop: 24 }}>
+          <div className="gs-row head" style={{ gridTemplateColumns: "1fr 100px 120px" }}>
+            <div>Top products</div><div>Sold</div><div>Revenue</div>
+          </div>
+          {analytics.topProducts.map((p, i) => (
+            <div className="gs-row" key={i} style={{ gridTemplateColumns: "1fr 100px 120px" }}>
+              <div className="gs-row-name">{p.name}</div>
+              <div className="gs-row-cat">{p.qty}</div>
+              <div className="gs-row-price">{inr(p.revenue)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
   const c = order.customer || {};
   const addressLine = [c.address1, c.address2].filter(Boolean).join(", ");
   const cityLine = [c.city, c.state, c.pincode].filter(Boolean).join(", ");
@@ -2074,13 +2195,21 @@ function OrderRow({ order, expanded, onToggle, onMarkPaid }) {
               {order.paymentId ? `Razorpay payment: ${order.paymentId}` : order.utr ? `UTR: ${order.utr}` : "Not yet paid"}
             </div>
             {!paid && (
-              <button
-                className="gs-addproductbtn"
-                style={{ marginTop: 8 }}
-                onClick={() => onMarkPaid(order.id)}
-              >
-                Mark as paid
-              </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                <button
+                  className="gs-addproductbtn"
+                  onClick={() => onMarkPaid(order.id)}
+                >
+                  Mark as paid
+                </button>
+                <button
+                  className="gs-deletebtn"
+                  style={{ width: "auto", padding: "8px 13px", fontSize: 12, marginTop: 0 }}
+                  onClick={() => onDelete(order.id)}
+                >
+                  <Trash2 size={13} style={{ marginRight: 5, verticalAlign: -2 }} /> Delete order
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -2167,6 +2296,11 @@ function ProductForm({ product, saving, onCancel, onSave, onDelete }) {
             <label>Stock</label>
             <input type="number" min="0" value={form.stock} onChange={(e) => update("stock", e.target.value)} placeholder="0" />
           </div>
+        </div>
+        <div className="gs-field">
+          <label>Cost price (INR) <span style={{ fontWeight: 400, color: "var(--muted)" }}>— optional, not shown to customers</span></label>
+          <input type="number" min="0" value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} placeholder="0" />
+          <div className="gs-imageupload-hint">What this item cost you to buy or make. Used to calculate profit on the Analytics tab — leave blank if you'd rather not track it.</div>
         </div>
         <div className="gs-field">
           <label>Product photo</label>

@@ -71,6 +71,11 @@ def price_cart(raw_items):
             "id": product.id,
             "name": product.name,
             "price": unit_price,
+            # Snapshot the per-unit cost at order time (not just a live
+            # lookup) so admin analytics' profit figure for old orders
+            # doesn't shift if a product's cost_price is edited later, or
+            # the product itself is deleted.
+            "cost": product.cost_price,
             "qty": qty,
             "mode": mode,
             "days": days,

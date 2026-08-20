@@ -9,6 +9,7 @@ class ProductSerializer(serializers.ModelSerializer):
     # doesn't need to know the difference.
     listingType = serializers.CharField(source="listing_type")
     rentPrice = serializers.IntegerField(source="rent_price", required=False, default=0)
+    costPrice = serializers.IntegerField(source="cost_price", required=False, default=0)
 
     class Meta:
         model = Product
@@ -23,6 +24,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "description",
             "rentPrice",
+            "costPrice",
         ]
 
 
