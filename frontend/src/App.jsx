@@ -914,8 +914,7 @@ export default function GeneralStoreApp() {
       id: orderId,
       customer: payForm,
       items: cartItems.map((i) => ({
-        id: i.id, name: i.name, price: i.unitPrice, qty: i.qty, mode: i.mode, days: i.days,
-        sku: i.sku,
+        id: i.id, name: i.name, price: i.unitPrice, qty: i.qty, mode: i.mode, days: i.days, sku: i.sku, image: i.image,
       })),
       total: subtotal + SHIPPING_FEE,
     };
@@ -2039,6 +2038,7 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
           {adminTab === "products" && (
             <button className="gs-addproductbtn" onClick={onAdd}><Plus size={15} /> Add product</button>
           )}
+          <button className="gs-logoutbtn" onClick={onReset}><RotateCcw size={13} /> Reset demo catalog</button>
           <button className="gs-logoutbtn" onClick={onLogout}><Lock size={13} /> Log out</button>
         </div>
       </div>
@@ -2217,10 +2217,28 @@ function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
           <div className="gs-orderdetail-col">
             <div className="gs-orderdetail-label">Items</div>
             {order.items.map((it, i) => (
-              <div className="gs-orderdetail-line" key={i}>
-                {it.name}{it.sku && ` (${it.sku})`} × {it.qty}
-                {it.mode === "rent" && ` (${it.days}-day rental)`}
-                {" — "}{inr(it.price * it.qty)}
+              <div
+                className="gs-orderdetail-line"
+                key={i}
+                style={{ display: "flex", alignItems: "center", gap: 8 }}
+              >
+                {it.image && (
+                  <img
+                    src={it.image}
+                    alt=""
+                    style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 5, flexShrink: 0 }}
+                  />
+                )}
+                <div>
+                  <div>
+                    {it.name}{it.sku && ` (${it.sku})`} × {it.qty}
+                    {it.mode === "rent" && ` (${it.days}-day rental)`}
+                    {" — "}{inr(it.price * it.qty)}
+                  </div>
+                  {it.id && (
+                    <div style={{ fontSize: 10.5, color: "var(--muted)" }}>ID: {it.id}</div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
