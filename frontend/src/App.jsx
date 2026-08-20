@@ -2039,7 +2039,6 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
           {adminTab === "products" && (
             <button className="gs-addproductbtn" onClick={onAdd}><Plus size={15} /> Add product</button>
           )}
-          <button className="gs-logoutbtn" onClick={onReset}><RotateCcw size={13} /> Reset demo catalog</button>
           <button className="gs-logoutbtn" onClick={onLogout}><Lock size={13} /> Log out</button>
         </div>
       </div>
