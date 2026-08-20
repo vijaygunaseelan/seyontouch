@@ -915,6 +915,7 @@ export default function GeneralStoreApp() {
       customer: payForm,
       items: cartItems.map((i) => ({
         id: i.id, name: i.name, price: i.unitPrice, qty: i.qty, mode: i.mode, days: i.days,
+        sku: i.sku,
       })),
       total: subtotal + SHIPPING_FEE,
     };
@@ -2218,7 +2219,7 @@ function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
             <div className="gs-orderdetail-label">Items</div>
             {order.items.map((it, i) => (
               <div className="gs-orderdetail-line" key={i}>
-                {it.name} × {it.qty}
+                {it.name}{it.sku && ` (${it.sku})`} × {it.qty}
                 {it.mode === "rent" && ` (${it.days}-day rental)`}
                 {" — "}{inr(it.price * it.qty)}
               </div>
