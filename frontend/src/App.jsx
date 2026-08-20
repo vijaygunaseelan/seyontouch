@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import * as api from "./api.js";
 import instagramQR from "./assets/instagram-qr.png";
-import peacockBg from "./assets/background_peacok.jpeg";
+import peacockBg from "./assets/peacock.jpeg";
 
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
@@ -58,7 +58,7 @@ const TOKENS = `
     background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.90)), url(${peacockBg});
     background-repeat: no-repeat;
     background-position: top center;
-    background-size: min(900px, 90vw) auto;
+    background-size: 100% 100%;
     background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-body);
