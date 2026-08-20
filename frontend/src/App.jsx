@@ -3,9 +3,10 @@ import {
   ShoppingBag, Plus, Minus, X, Trash2, Settings, Store as StoreIcon,
   Check, Loader2, Package, ArrowLeft, Pencil, ImageOff, ReceiptText,
   Lock, AlertCircle, ChevronLeft, ChevronRight, CalendarDays, RotateCcw, ChevronDown, UploadCloud,
-  Eye, ZoomIn,
+  Eye, ZoomIn, Phone, Mail, Instagram,
 } from "lucide-react";
 import * as api from "./api.js";
+import instagramQR from "./assets/instagram-qr.png";
 
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
@@ -17,6 +18,12 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 // that's the value actually charged; this one is just what's displayed
 // before the order is created.
 const SHIPPING_FEE = 60;
+
+// Store contact details shown in the site footer.
+const STORE_PHONE = "+91 9611975252";
+const STORE_EMAIL = "seyontouch@gmail.com";
+const STORE_INSTAGRAM_HANDLE = "seyontouch";
+const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
 
 /* ---------------------------------------------------------------
    TOKENS
@@ -509,6 +516,32 @@ const TOKENS = `
     display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 24px rgba(0,0,0,0.4);
   }
 
+  .gs-footer {
+    margin-top: 40px; background: var(--panel); border-top: 1px solid var(--line);
+  }
+  .gs-footer-inner {
+    max-width: 1160px; margin: 0 auto; padding: 36px 24px 24px;
+    display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
+  }
+  .gs-footer-col { display: flex; flex-direction: column; gap: 10px; min-width: 180px; }
+  .gs-footer-brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--ink); }
+  .gs-footer-tagline { font-size: 12.5px; color: var(--muted); max-width: 220px; }
+  .gs-footer-contact { gap: 9px; }
+  .gs-footer-link {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-2);
+    text-decoration: none; width: fit-content;
+  }
+  .gs-footer-link:hover { color: var(--gold); }
+  .gs-footer-qr { align-items: flex-start; }
+  .gs-footer-qr img {
+    width: 96px; height: 96px; border-radius: 8px; border: 1px solid var(--line); background: #fff; padding: 4px;
+  }
+  .gs-footer-qr span { font-size: 11px; color: var(--muted); }
+  .gs-footer-bottom {
+    border-top: 1px solid var(--line); padding: 14px 24px; text-align: center;
+    font-size: 11px; color: var(--muted); font-family: var(--font-mono);
+  }
+
   .gs-bottombar { display: none; }
 
   .gs-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); flex-direction: column; gap: 10px; }
@@ -533,6 +566,10 @@ const TOKENS = `
     .gs-cartbtn { display: none; }
     .gs-row { grid-template-columns: 40px 1fr 70px; }
     .gs-row .gs-row-cat, .gs-row .gs-row-stock { display: none; }
+    .gs-footer { margin-bottom: 58px; }
+    .gs-footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 24px; padding: 28px 20px 20px; }
+    .gs-footer-col { align-items: center; }
+    .gs-footer-tagline { max-width: none; }
     .gs-bottombar {
       display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
       background: var(--paper); border-top: 1px solid var(--line);
@@ -1067,6 +1104,8 @@ export default function GeneralStoreApp() {
           </div>
         )}
       </main>
+
+      {view === "store" && <StoreFooter />}
 
       {cartOpen && (
         <>
@@ -1622,7 +1661,39 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
   );
 }
 
-/* ---------------- CART DRAWER ---------------- */
+/* ---------------- FOOTER ---------------- */
+function StoreFooter() {
+  return (
+    <footer className="gs-footer">
+      <div className="gs-footer-inner">
+        <div className="gs-footer-col">
+          <div className="gs-footer-brand">Seyon Touch</div>
+          <div className="gs-footer-tagline">Designer jewelry, made to be worn.</div>
+        </div>
+
+        <div className="gs-footer-col gs-footer-contact">
+          <a className="gs-footer-link" href={`tel:+91${STORE_PHONE}`}>
+            <Phone size={15} /> +91 {STORE_PHONE}
+          </a>
+          <a className="gs-footer-link" href={`mailto:${STORE_EMAIL}`}>
+            <Mail size={15} /> {STORE_EMAIL}
+          </a>
+          <a className="gs-footer-link" href={STORE_INSTAGRAM_URL} target="_blank" rel="noreferrer">
+            <Instagram size={15} /> @{STORE_INSTAGRAM_HANDLE}
+          </a>
+        </div>
+
+        <div className="gs-footer-col gs-footer-qr">
+          <img src={instagramQR} alt="Scan to follow Seyon Touch on Instagram" />
+          <span>Scan to follow us</span>
+        </div>
+      </div>
+      <div className="gs-footer-bottom">&copy; {new Date().getFullYear()} Seyon Touch. All rights reserved.</div>
+    </footer>
+  );
+}
+
+/* ---------------- CART ---------------- */
 function CartDrawer({ items, subtotal, onClose, onChangeQty, onRemove, onCheckout }) {
   return (
     <div className="gs-drawer">
