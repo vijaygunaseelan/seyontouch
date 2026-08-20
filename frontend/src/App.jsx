@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import * as api from "./api.js";
 import instagramQR from "./assets/instagram-qr.png";
+import peacockBg from "./assets/background_peacok.jpeg";
 
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
@@ -20,7 +21,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 const SHIPPING_FEE = 60;
 
 // Store contact details shown in the site footer.
-const STORE_PHONE = "7777777777";
+const STORE_PHONE = "+91 9611975252";
 const STORE_EMAIL = "seyontouch@gmail.com";
 const STORE_INSTAGRAM_HANDLE = "seyontouch";
 const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
@@ -54,6 +55,11 @@ const TOKENS = `
     --font-mono: 'IBM Plex Mono', monospace;
 
     background-color: var(--bg);
+    background-image: linear-gradient(rgba(255,255,255,0.90), rgba(255,255,255,0.90)), url(${peacockBg});
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: min(900px, 90vw) auto;
+    background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-body);
     min-height: 100vh;
@@ -566,6 +572,13 @@ const TOKENS = `
   @keyframes gsSpin { to { transform: rotate(360deg) } }
 
   @media (max-width: 640px) {
+    .gs-root {
+      /* iOS Safari doesn't handle background-attachment: fixed well
+         (causes jank/repaint bugs on scroll) — fall back to a normal
+         scrolling background there, still faded and centered at top. */
+      background-attachment: scroll;
+      background-size: min(600px, 85vw) auto;
+    }
     .gs-header { padding: 14px 0; }
     .gs-header-inner { padding: 0 16px; }
     .gs-brand-name { font-size: 17px; }
