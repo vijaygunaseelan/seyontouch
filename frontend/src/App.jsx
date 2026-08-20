@@ -20,7 +20,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 const SHIPPING_FEE = 60;
 
 // Store contact details shown in the site footer.
-const STORE_PHONE = "+91 9611975252";
+const STORE_PHONE = "7777777777";
 const STORE_EMAIL = "seyontouch@gmail.com";
 const STORE_INSTAGRAM_HANDLE = "seyontouch";
 const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
@@ -1517,7 +1517,6 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
   const [imgError, setImgError] = useState(false);
   const [rentDays, setRentDays] = useState(3);
   const outOfStock = product.stock <= 0;
-  const low = product.stock > 0 && product.stock <= 5;
   const isRentMode = mode === "rent";
 
   function confirmRent() {
@@ -1572,10 +1571,12 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
               </div>
             </div>
             <div className="gs-card-foot">
-              <div className="gs-stock">
-                <span className="gs-stockdot" style={{ background: outOfStock ? "#c0392b" : low ? "#E0654F" : "#6B8F71" }} />
-                {outOfStock ? "Out of stock" : low ? `${product.stock} left` : "In stock"}
-              </div>
+              {outOfStock ? (
+                <div className="gs-stock">
+                  <span className="gs-stockdot" style={{ background: "#c0392b" }} />
+                  Out of stock
+                </div>
+              ) : <span />}
               <button className="gs-rentconfirm compact" disabled={outOfStock} onClick={confirmRent}>
                 <CalendarDays size={13} /> Rent · {inr(product.rentPrice * rentDays)}
               </button>
@@ -1583,10 +1584,12 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
           </>
         ) : (
           <div className="gs-card-foot">
-            <div className="gs-stock">
-              <span className="gs-stockdot" style={{ background: outOfStock ? "#c0392b" : low ? "#E0654F" : "#6B8F71" }} />
-              {outOfStock ? "Out of stock" : low ? `${product.stock} left` : "In stock"}
-            </div>
+            {outOfStock ? (
+              <div className="gs-stock">
+                <span className="gs-stockdot" style={{ background: "#c0392b" }} />
+                Out of stock
+              </div>
+            ) : <span />}
             <button className="gs-addbtn" disabled={outOfStock} onClick={() => onAdd(product, { mode: "sale" })}>
               <Plus size={13} /> Add
             </button>
@@ -1614,7 +1617,6 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
   }, [onClose]);
 
   const outOfStock = product.stock <= 0;
-  const low = product.stock > 0 && product.stock <= 5;
   const canRent = product.listingType === "rent" || product.listingType === "both";
   const canSell = (product.listingType || "sale") !== "rent";
   const isRentMode = detailMode === "rent";
@@ -1677,10 +1679,12 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
               )}
             </div>
 
-            <div className="gs-detailstock">
-              <span className="gs-stockdot" style={{ background: outOfStock ? "#c0392b" : low ? "#E0654F" : "#6B8F71" }} />
-              {outOfStock ? "Out of stock" : low ? `Only ${product.stock} left` : `${product.stock} in stock`}
-            </div>
+            {outOfStock && (
+              <div className="gs-detailstock">
+                <span className="gs-stockdot" style={{ background: "#c0392b" }} />
+                Out of stock
+              </div>
+            )}
 
             <div className="gs-detailactions">
               {isRentMode && (
@@ -2005,6 +2009,7 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
           {adminTab === "products" && (
             <button className="gs-addproductbtn" onClick={onAdd}><Plus size={15} /> Add product</button>
           )}
+          <button className="gs-logoutbtn" onClick={onReset}><RotateCcw size={13} /> Reset demo catalog</button>
           <button className="gs-logoutbtn" onClick={onLogout}><Lock size={13} /> Log out</button>
         </div>
       </div>
