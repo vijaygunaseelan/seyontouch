@@ -608,7 +608,7 @@ const TOKENS = `
   }
 `;
 
-const LOGO_URI = "./assets/apple-touch-icon.png";
+const LOGO_URI = "https://user23766.na.imgto.link/public/20260820/favicon-192.avif";
 const CURRENCY = "₹";
 
 const CATEGORIES = [
