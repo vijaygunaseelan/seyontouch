@@ -21,7 +21,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 const SHIPPING_FEE = 60;
 
 // Store contact details shown in the site footer.
-const STORE_PHONE = "+91 9611975252";
+const STORE_PHONE = "9611975252";
 const STORE_EMAIL = "seyontouch@gmail.com";
 const STORE_INSTAGRAM_HANDLE = "seyontouch";
 const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
