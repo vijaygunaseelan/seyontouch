@@ -6,8 +6,7 @@ import {
   Eye, ZoomIn, Phone, Mail, Instagram,
 } from "lucide-react";
 import * as api from "./api.js";
-import instagramQR from "./assets/instagram-qr.png";
-
+import instagramQR from "./assets/adobe-express-qr-code.png";
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
 // back, not the password itself.
