@@ -8,6 +8,14 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Seyon Touch</title>
+    <style>
+      /* Without this, html/body/#root have no defined height, so the app
+         only grows as tall as its own content and leaves blank space
+         above/below on any viewport taller than that — this is what
+         forces it to actually fill the screen edge-to-edge. */
+      html, body, #root { height: 100%; margin: 0; padding: 0; }
+      body { min-height: 100vh; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

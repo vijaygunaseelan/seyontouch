@@ -6,7 +6,8 @@ import {
   Eye, ZoomIn, Phone, Mail, Instagram,
 } from "lucide-react";
 import * as api from "./api.js";
-import instagramQR from "./assets/adobe-express-qr-code.png";
+import instagramQR from "./assets/instagram-qr.png";
+
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
 // back, not the password itself.
@@ -19,7 +20,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 const SHIPPING_FEE = 60;
 
 // Store contact details shown in the site footer.
-const STORE_PHONE = "7777777777";
+const STORE_PHONE = "+91 9611975252";
 const STORE_EMAIL = "seyontouch@gmail.com";
 const STORE_INSTAGRAM_HANDLE = "seyontouch";
 const STORE_INSTAGRAM_URL = "https://instagram.com/seyontouch";
@@ -55,9 +56,11 @@ const TOKENS = `
     background-color: var(--bg);
     color: var(--ink);
     font-family: var(--font-body);
-    min-height: 100%;
+    min-height: 100vh;
     width: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
   .gs-root * { box-sizing: border-box; }
   .gs-root button { font-family: inherit; cursor: pointer; }
@@ -118,7 +121,7 @@ const TOKENS = `
   .gs-adminicon:hover { border-color: var(--line); color: var(--ink); }
   .gs-adminicon.active { background: var(--gold); color: var(--gold-ink); }
 
-  .gs-main { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; }
+  .gs-main { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; width: 100%; flex: 1; }
 
   .gs-hero { position: relative; margin-bottom: 40px; }
   .gs-hero-track {
