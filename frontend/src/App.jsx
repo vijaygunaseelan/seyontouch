@@ -1794,7 +1794,6 @@ function StoreFooter() {
         </div>
 
         <div className="gs-footer-col gs-footer-qr">
-          <img src={footerBadge}/>
           <img src={instagramQR} alt="Scan to follow Seyon Touch on Instagram" />
           <span>Scan to follow us</span>
         </div>
