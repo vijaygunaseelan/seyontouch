@@ -1775,11 +1775,7 @@ function StoreFooter() {
           <a className="gs-footer-link" href="/terms-and-conditions">Terms & Conditions</a>
           <a className="gs-footer-link" href="/shipping-policy">Shipping & Delivery</a>
           <a className="gs-footer-link" href="/refund-policy">Refund & Exchange</a>
-          <img
-            className="gs-footer-badge"
-            src={footerBadge}
-            alt="Secure & trusted checkout"
-          />
+          <img src={footerBadge} alt="Seyon Touch" className="gs-brand-logo" />
         </div>
 
         <div className="gs-footer-col gs-footer-qr">
