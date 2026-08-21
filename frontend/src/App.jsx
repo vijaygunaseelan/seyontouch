@@ -202,7 +202,7 @@ const TOKENS = `
   .gs-catcard-label {
     font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-align: center;
     color: #FFFFFF; line-height: 1.3; white-space: normal; word-break: break-word;
-    max-width: 100%; padding: 8px 6px; min-height: 34px;
+    width: 100%; padding: 8px 6px; min-height: 34px;
     display: flex; align-items: center; justify-content: center;
     background: #072E4E;
   }
