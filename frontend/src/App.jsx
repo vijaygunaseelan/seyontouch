@@ -1753,6 +1753,7 @@ function StoreFooter() {
       <div className="gs-footer-inner">
         <div className="gs-footer-col">
           <div className="gs-footer-brand">Seyon Touch</div>
+          <img src={LOGO_URI} alt="Seyon Touch" className="gs-brand-logo" />
           <div className="gs-footer-tagline">Designer jewelry, made to be worn.</div>
         </div>
 
