@@ -78,7 +78,7 @@ const TOKENS = `
     display: flex;
     flex-direction: column;
   }
-    
+
   .gs-root * { box-sizing: border-box; }
   .gs-root button { font-family: inherit; cursor: pointer; }
   .gs-root ::selection { background: var(--gold); color: var(--gold-ink); }
@@ -1792,11 +1792,9 @@ function StoreFooter() {
           <a className="gs-footer-link" href="/shipping-policy">Shipping & Delivery</a>
           <a className="gs-footer-link" href="/refund-policy">Refund & Exchange</a>
         </div>
+
         <div className="gs-footer-col gs-footer-qr">
-          <img src={footerBadge} alt="Scan to follow Seyon Touch on Instagram" />
-          <span>Scan to follow us</span>
-        </div>
-        <div className="gs-footer-col gs-footer-qr">
+          <img src={footerBadge}/>
           <img src={instagramQR} alt="Scan to follow Seyon Touch on Instagram" />
           <span>Scan to follow us</span>
         </div>
