@@ -180,31 +180,32 @@ const TOKENS = `
   .gs-shoptab:hover { border-color: var(--gold); color: var(--ink); }
   .gs-shoptab.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
-  .gs-catchips { display: flex; gap: 16px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px; margin-bottom: 20px; scrollbar-width: thin; }
+  .gs-catchips { display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px; margin-bottom: 20px; scrollbar-width: thin; }
   .gs-catcard {
-    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 7px;
-    width: 72px; background: transparent; border: none; padding: 0;
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 0;
+    width: 96px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 0; overflow: hidden; transition: border-color .15s ease, transform .15s ease;
   }
+  .gs-catcard:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .gs-catcard.active { border-color: var(--gold); box-shadow: 0 0 0 1.5px var(--gold); }
   .gs-catcard-ring {
-    width: 66px; height: 66px; border-radius: 50%; padding: 2.5px;
-    background: var(--line);
+    width: 100%; height: 76px; padding: 0; background: #ddd6c4;
     display: flex; align-items: center; justify-content: center;
-    transition: background .2s ease, transform .15s ease;
   }
-  .gs-catcard:hover .gs-catcard-ring { background: linear-gradient(135deg, var(--gold), var(--coral)); transform: translateY(-2px); }
-  .gs-catcard.active .gs-catcard-ring { background: linear-gradient(135deg, var(--gold) 0%, var(--coral) 55%, var(--ink) 100%); }
   .gs-catcard-img {
-    width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
-    background: #ddd6c4; border: 2.5px solid var(--paper);
+    width: 100%; height: 100%; border-radius: 0; overflow: hidden;
+    background: #ddd6c4; border: none;
     display: flex; align-items: center; justify-content: center;
   }
   .gs-catcard-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .gs-catcard-img svg { color: #a89f88; }
   .gs-catcard-label {
     font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-align: center;
-    color: var(--muted-2); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+    color: var(--muted-2); line-height: 1.3; white-space: normal; word-break: break-word;
+    max-width: 100%; padding: 8px 6px; min-height: 34px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .gs-catcard.active .gs-catcard-label { color: var(--ink); font-weight: 700; }
+  .gs-catcard.active .gs-catcard-label { color: var(--ink); font-weight: 700; background: var(--panel); }
 
   .gs-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px;
@@ -596,9 +597,9 @@ const TOKENS = `
     .gs-hero-track { min-height: 360px; }
     .gs-hero-slide-content { padding: 22px 20px 20px; }
     .gs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .gs-catcard { width: 64px; }
-    .gs-catcard-ring { width: 58px; height: 58px; }
-    .gs-catcard-label { font-size: 10px; max-width: 64px; }
+    .gs-catcard { width: 82px; }
+    .gs-catcard-ring { height: 64px; }
+    .gs-catcard-label { font-size: 10px; max-width: 100%; padding: 6px 4px; min-height: 30px; }
     .gs-card-name { font-size: 15px; }
     .gs-card-desc { display: none; }
     .gs-tag { font-size: 11.5px; padding: 5px 8px 5px 11px; }
