@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import * as api from "./api.js";
 import instagramQR from "./assets/instagram-qr.png";
+import footerBadge from '../assets/footer_img.jpeg';
 
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
@@ -1753,7 +1754,6 @@ function StoreFooter() {
       <div className="gs-footer-inner">
         <div className="gs-footer-col">
           <div className="gs-footer-brand">Seyon Touch</div>
-          <img src={LOGO_URI} alt="Seyon Touch" className="gs-brand-logo" />
           <div className="gs-footer-tagline">Designer jewelry, made to be worn.</div>
         </div>
 
@@ -1767,6 +1767,19 @@ function StoreFooter() {
           <a className="gs-footer-link" href={STORE_INSTAGRAM_URL} target="_blank" rel="noreferrer">
             <Instagram size={15} /> @{STORE_INSTAGRAM_HANDLE}
           </a>
+        </div>
+
+        <div className="gs-footer-col gs-footer-policies">
+          <div className="gs-footer-col-title">Policies</div>
+          <a className="gs-footer-link" href="/privacy-policy">Privacy Policy</a>
+          <a className="gs-footer-link" href="/terms-and-conditions">Terms & Conditions</a>
+          <a className="gs-footer-link" href="/shipping-policy">Shipping & Delivery</a>
+          <a className="gs-footer-link" href="/refund-policy">Refund & Exchange</a>
+          <img
+            className="gs-footer-badge"
+            src={footerBadge}
+            alt="Secure & trusted checkout"
+          />
         </div>
 
         <div className="gs-footer-col gs-footer-qr">
