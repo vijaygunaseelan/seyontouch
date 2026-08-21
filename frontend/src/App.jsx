@@ -47,12 +47,27 @@ const TOKENS = `
     --gold-ink: #072E4E;
     --green: #027F7B;
     --coral: #C6482F;
-    /* Stand-in for TT Drugs (paid font, not embeddable here). If you own a TT Drugs
-       license, replace the @import above with your own @font-face block pointing at
-       your hosted .woff2 files, and change 'Bricolage Grotesque' below to 'TT Drugs'. */
-    --font-display: 'Bricolage Grotesque', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
+
+    @font-face {
+      font-family: 'TT Drugs';
+      src: url('/fonts/TTDrugs-Regular.woff2') format('woff2'),
+           url('/fonts/TTDrugs-Regular.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'TT Drugs';
+      src: url('/fonts/TTDrugs-Bold.woff2') format('woff2'),
+           url('/fonts/TTDrugs-Bold.woff') format('woff');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    --font-display: 'TT Drugs', 'Bricolage Grotesque', sans-serif;
+    --font-body: 'TT Drugs', 'Space Grotesk', sans-serif;
+    --font-mono: 'TT Drugs', 'IBM Plex Mono', monospace;
 
     background-color: var(--bg);
     color: var(--ink);
@@ -63,6 +78,7 @@ const TOKENS = `
     display: flex;
     flex-direction: column;
   }
+    
   .gs-root * { box-sizing: border-box; }
   .gs-root button { font-family: inherit; cursor: pointer; }
   .gs-root ::selection { background: var(--gold); color: var(--gold-ink); }
@@ -1775,9 +1791,11 @@ function StoreFooter() {
           <a className="gs-footer-link" href="/terms-and-conditions">Terms & Conditions</a>
           <a className="gs-footer-link" href="/shipping-policy">Shipping & Delivery</a>
           <a className="gs-footer-link" href="/refund-policy">Refund & Exchange</a>
-          <img src={footerBadge} alt="Seyon Touch" className="gs-brand-logo" />
         </div>
-
+        <div className="gs-footer-col gs-footer-qr">
+          <img src={footerBadge} alt="Scan to follow Seyon Touch on Instagram" />
+          <span>Scan to follow us</span>
+        </div>
         <div className="gs-footer-col gs-footer-qr">
           <img src={instagramQR} alt="Scan to follow Seyon Touch on Instagram" />
           <span>Scan to follow us</span>
