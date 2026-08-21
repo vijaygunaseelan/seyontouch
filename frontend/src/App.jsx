@@ -201,11 +201,12 @@ const TOKENS = `
   .gs-catcard-img svg { color: #a89f88; }
   .gs-catcard-label {
     font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-align: center;
-    color: var(--muted-2); line-height: 1.3; white-space: normal; word-break: break-word;
+    color: #FFFFFF; line-height: 1.3; white-space: normal; word-break: break-word;
     max-width: 100%; padding: 8px 6px; min-height: 34px;
     display: flex; align-items: center; justify-content: center;
+    background: #072E4E;
   }
-  .gs-catcard.active .gs-catcard-label { color: #041a2e; font-weight: 700; background: var(--panel); }
+  .gs-catcard.active .gs-catcard-label { color: #FFFFFF; font-weight: 700; background: #072e4e; }
   .gs-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px;
   }
