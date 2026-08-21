@@ -554,10 +554,15 @@ const TOKENS = `
     margin-top: 40px; background: #072E4E; border-top: 1px solid rgba(255,255,255,0.12);
   }
   .gs-footer-inner {
-    max-width: 1160px; margin: 0 auto; padding: 36px 24px 24px;
-    display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
-  }
+      max-width: 1160px; margin: 0 auto; padding: 36px 24px 24px;
+      display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
+      align-items: flex-start;
+    }
   .gs-footer-col { display: flex; flex-direction: column; gap: 10px; min-width: 180px; }
+  .gs-footer-col-title {
+    font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.5); margin-bottom: 2px;
+  }
   .gs-footer-brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: #FFFFFF; }
   .gs-footer-tagline { font-size: 12.5px; color: rgba(255,255,255,0.7); max-width: 220px; }
   .gs-footer-contact { gap: 9px; }
