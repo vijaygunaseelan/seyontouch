@@ -205,8 +205,7 @@ const TOKENS = `
     max-width: 100%; padding: 8px 6px; min-height: 34px;
     display: flex; align-items: center; justify-content: center;
   }
-  .gs-catcard.active .gs-catcard-label { color: var(--ink); font-weight: 700; background: var(--panel); }
-
+  .gs-catcard.active .gs-catcard-label { color: #041a2e; font-weight: 700; background: var(--panel); }
   .gs-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px;
   }
