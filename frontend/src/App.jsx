@@ -1283,7 +1283,7 @@ const HERO_SLIDES = [
   {
     eyebrow: "Shop the collection",
     title: "Small, well-made things.",
-    text: "Every item is stocked, priced, and tagged by hand from the admin ledger — add something to your basket to see checkout in action.",
+    text: "Shine every day, without the tarnish.Timeless elegance, made to last.",
     bg: 'url("https://user23766.na.imgto.link/public/20260814/dsc-3528.avif")',
   },
   {
