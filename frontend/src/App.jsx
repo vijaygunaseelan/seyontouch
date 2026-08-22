@@ -243,6 +243,12 @@ const TOKENS = `
   }
   .gs-tag::before { content: ''; position: absolute; left: 5px; top: 50%; transform: translateY(-50%); width: 3px; height: 3px; border-radius: 50%; background: var(--gold-ink); opacity: .6; }
 
+  .gs-card-price {
+    font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--ink);
+    white-space: nowrap;
+  }
+  .gs-card-pricebox { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
   .gs-rentbadge {
     position: absolute; bottom: 10px; left: 10px;
     background: rgba(7,46,78,0.88); color: #fff; font-family: var(--font-mono);
@@ -1643,9 +1649,6 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
         <div className="gs-card-img-scrim">
           <div className="gs-card-img-quickview"><Eye size={13} /> Quick view</div>
         </div>
-        <div className="gs-tag">
-          {isRentMode ? `${inr(product.rentPrice)}/day` : inr(product.price)}
-        </div>
         {isRentMode && <div className="gs-rentbadge">Rental</div>}
       </div>
       <div className="gs-card-body">
@@ -1683,12 +1686,15 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
               />
             </div>
             <div className="gs-card-foot">
-              {outOfStock ? (
-                <div className="gs-stock">
-                  <span className="gs-stockdot" style={{ background: "#c0392b" }} />
-                  Out of stock
-                </div>
-              ) : <span />}
+              <div className="gs-card-pricebox">
+                <div className="gs-card-price">{inr(product.rentPrice)}/day</div>
+                {outOfStock ? (
+                  <div className="gs-stock">
+                    <span className="gs-stockdot" style={{ background: "#c0392b" }} />
+                    Out of stock
+                  </div>
+                ) : null}
+              </div>
               <button className="gs-rentconfirm compact" disabled={outOfStock} onClick={confirmRent}>
                 <CalendarDays size={13} /> Rent · {inr(product.rentPrice * rentDays)}
               </button>
@@ -1696,12 +1702,15 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
           </>
         ) : (
           <div className="gs-card-foot">
-            {outOfStock ? (
-              <div className="gs-stock">
-                <span className="gs-stockdot" style={{ background: "#c0392b" }} />
-                Out of stock
-              </div>
-            ) : <span />}
+            <div className="gs-card-pricebox">
+              <div className="gs-card-price">{inr(product.price)}</div>
+              {outOfStock ? (
+                <div className="gs-stock">
+                  <span className="gs-stockdot" style={{ background: "#c0392b" }} />
+                  Out of stock
+                </div>
+              ) : null}
+            </div>
             <button className="gs-addbtn" disabled={outOfStock} onClick={() => onAdd(product, { mode: "sale" })}>
               <Plus size={13} /> Add
             </button>
