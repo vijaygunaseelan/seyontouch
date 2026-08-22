@@ -122,7 +122,7 @@ const TOKENS = `
   }
   .gs-adminicon-logo { width: 20px; height: 20px; object-fit: contain; display: block; }
   .gs-adminicon:hover { border-color: var(--line); color: var(--ink); }
-  .gs-adminicon.active { background: var(--gold); color: var(--gold-ink); }
+  .gs-adminicon.active { background: #072E4E; color: #FFFFFF; }
 
   .gs-main { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; width: 100%; flex: 1; }
 
@@ -211,6 +211,7 @@ const TOKENS = `
   .gs-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s ease; }
   .gs-card-img-wrap:hover img { transform: scale(1.05); }
   .gs-card-noimg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #a89f88; }
+  .gs-card-sku { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); margin-top: -2px; }
 
   .gs-card-img-scrim {
     position: absolute; inset: 0;
@@ -1062,7 +1063,7 @@ export default function GeneralStoreApp() {
       listingType: p.listingType || "sale",
       rentPrice: Number(p.rentPrice) || 0,
       costPrice: Number(p.costPrice) || 0,
-      sku: p.sku || "GS-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
+      sku: p.sku || "ST-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
       image: p.image || `https://picsum.photos/seed/${encodeURIComponent(p.name || uid())}/500/500`,
     };
     const exists = products.some((x) => x.id === clean.id);
@@ -1592,6 +1593,7 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
       <div className="gs-card-body">
         <div className="gs-card-cat">{product.category}</div>
         <div className="gs-card-name" onClick={onPreview}>{product.name}</div>
+        {product.sku && <div className="gs-card-sku">SKU: {product.sku}</div>}
         <div className="gs-card-desc">{product.description}</div>
         {!isRentMode && product.listingType === "both" && (
           <div className="gs-rentnote">or rent from {inr(product.rentPrice)}/day</div>
