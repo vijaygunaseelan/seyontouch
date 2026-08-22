@@ -283,6 +283,11 @@ const TOKENS = `
   .gs-rentday.active { background: var(--green); border-color: var(--green); color: #fff; }
   .gs-rentpicker-total { font-family: var(--font-mono); font-size: 12.5px; color: #6f6a5e; margin-bottom: 10px; }
   .gs-rentpicker-total strong { color: var(--ink); }
+  .gs-rentdate {
+    width: 100%; border: 1px solid #d8d1ba; background: #fff; border-radius: 6px;
+    padding: 7px 8px; font-size: 12px; font-family: var(--font-mono); color: var(--ink); margin-top: 2px; margin-bottom: 8px;
+  }
+  .gs-rentdate:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
   .gs-rentconfirm {
     background: var(--green); color: #fff; border: none; border-radius: 7px;
     padding: 9px 12px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -315,6 +320,7 @@ const TOKENS = `
   .gs-line-name { font-family: var(--font-display); font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .gs-rentchip { font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; background: var(--green); color: #fff; padding: 2px 7px; border-radius: 999px; font-weight: 600; }
   .gs-line-price { font-family: var(--font-mono); font-size: 12px; color: #6f6a5e; margin-top: 2px; }
+  .gs-line-dates { font-family: var(--font-mono); font-size: 11px; color: var(--green); margin-top: 1px; }
   .gs-qty { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
   .gs-qtybtn { width: 22px; height: 22px; border-radius: 5px; border: 1px solid #d8d1ba; background: #fff; display: flex; align-items: center; justify-content: center; }
   .gs-qtyval { font-family: var(--font-mono); font-size: 12.5px; min-width: 16px; text-align: center; }
@@ -648,6 +654,31 @@ function uid(prefix = "id") {
   return prefix + "_" + Math.random().toString(36).slice(2, 10);
 }
 
+// ---- Rental date helpers ----
+// All rental dates are plain "YYYY-MM-DD" strings (what <input type="date">
+// gives/wants), so these avoid timezone surprises by parsing/formatting at
+// local midnight rather than doing any UTC math.
+function todayISO() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function addDaysISO(iso, days) {
+  if (!iso) return iso;
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + (Number(days || 1) - 1));
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function formatDateShort(iso) {
+  if (!iso) return "";
+  return new Date(iso + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
 // Resizes and re-encodes an uploaded image before it's stored, since uploaded
 // photos live inline (as data URIs) inside the shared product record rather
 // than on a real file server — keeping them small matters here.
@@ -788,7 +819,15 @@ export default function GeneralStoreApp() {
         const product = products.find((p) => p.id === entry.productId);
         if (!product) return null;
         const unitPrice = entry.mode === "rent" ? Number(product.rentPrice || 0) * entry.days : Number(product.price);
-        return { ...product, cartKey, mode: entry.mode, days: entry.days, qty: entry.qty, unitPrice };
+        return {
+          ...product,
+          cartKey,
+          mode: entry.mode,
+          days: entry.days,
+          startDate: entry.startDate,
+          qty: entry.qty,
+          unitPrice,
+        };
       })
       .filter(Boolean);
   }, [cart, products]);
@@ -805,7 +844,12 @@ export default function GeneralStoreApp() {
   function addToCart(product, opts = { mode: "sale" }) {
     const mode = opts.mode || "sale";
     const days = mode === "rent" ? opts.days || 3 : undefined;
-    const cartKey = mode === "rent" ? `${product.id}::rent::${days}` : product.id;
+    // Rental start date defaults to today if the caller didn't pass one.
+    const startDate = mode === "rent" ? (opts.startDate || todayISO()) : undefined;
+    // Different start dates for the same product/duration are kept as
+    // separate cart lines rather than merged, since they're genuinely
+    // different bookings.
+    const cartKey = mode === "rent" ? `${product.id}::rent::${days}::${startDate}` : product.id;
     const already = cartQtyForProduct(product.id);
     if (product.stock <= already) {
       showToast(`Only ${product.stock} left in stock`);
@@ -817,6 +861,7 @@ export default function GeneralStoreApp() {
         productId: product.id,
         mode,
         days,
+        startDate,
         qty: (c[cartKey]?.qty || 0) + 1,
       },
     }));
@@ -930,7 +975,15 @@ export default function GeneralStoreApp() {
       id: orderId,
       customer: payForm,
       items: cartItems.map((i) => ({
-        id: i.id, name: i.name, price: i.unitPrice, qty: i.qty, mode: i.mode, days: i.days, sku: i.sku, image: i.image,
+        id: i.id,
+        name: i.name,
+        price: i.unitPrice,
+        qty: i.qty,
+        mode: i.mode,
+        days: i.days,
+        startDate: i.startDate,
+        sku: i.sku,
+        image: i.image,
       })),
       total: subtotal + SHIPPING_FEE,
     };
@@ -1562,11 +1615,14 @@ const RENT_DURATIONS = [1, 3, 7];
 function ProductCard({ product, onAdd, mode, onPreview }) {
   const [imgError, setImgError] = useState(false);
   const [rentDays, setRentDays] = useState(3);
+  // Rental start date the customer wants to pick this item up / have it
+  // delivered on. Defaults to today; can't be set in the past.
+  const [rentStartDate, setRentStartDate] = useState(todayISO());
   const outOfStock = product.stock <= 0;
   const isRentMode = mode === "rent";
 
   function confirmRent() {
-    onAdd(product, { mode: "rent", days: rentDays });
+    onAdd(product, { mode: "rent", days: rentDays, startDate: rentStartDate });
   }
 
   return (
@@ -1616,6 +1672,15 @@ function ProductCard({ product, onAdd, mode, onPreview }) {
                   </button>
                 ))}
               </div>
+              <div className="gs-rentpicker-label">Renting from</div>
+              <input
+                type="date"
+                className="gs-rentdate"
+                min={todayISO()}
+                value={rentStartDate}
+                onChange={(e) => setRentStartDate(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
             <div className="gs-card-foot">
               {outOfStock ? (
@@ -1654,6 +1719,7 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
     product.listingType === "rent" ? "rent" : product.listingType === "both" ? initialMode : "sale"
   );
   const [rentDays, setRentDays] = useState(3);
+  const [rentStartDate, setRentStartDate] = useState(todayISO());
 
   useEffect(() => {
     function onKey(e) {
@@ -1670,7 +1736,7 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
 
   function handleAdd() {
     if (isRentMode) {
-      onAdd(product, { mode: "rent", days: rentDays });
+      onAdd(product, { mode: "rent", days: rentDays, startDate: rentStartDate });
     } else {
       onAdd(product, { mode: "sale" });
     }
@@ -1748,7 +1814,17 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
                       </button>
                     ))}
                   </div>
+                  <div className="gs-rentpicker-label">Renting from</div>
+                  <input
+                    type="date"
+                    className="gs-rentdate"
+                    min={todayISO()}
+                    value={rentStartDate}
+                    onChange={(e) => setRentStartDate(e.target.value)}
+                  />
                   <div className="gs-rentpicker-total">
+                    {formatDateShort(rentStartDate)} – {formatDateShort(addDaysISO(rentStartDate, rentDays))}
+                    {" · "}
                     Total: <strong>{inr(product.rentPrice * rentDays)}</strong> for {rentDays} day{rentDays > 1 ? "s" : ""}
                   </div>
                 </div>
@@ -1830,6 +1906,12 @@ function CartDrawer({ items, subtotal, onClose, onChangeQty, onRemove, onCheckou
                 <div className="gs-line-price">
                   {inr(item.unitPrice)} {item.mode === "rent" ? `for ${item.days} day${item.days > 1 ? "s" : ""}` : "each"}
                 </div>
+                {item.mode === "rent" && item.startDate && (
+                  <div className="gs-line-dates">
+                    <CalendarDays size={11} style={{ verticalAlign: -2, marginRight: 4 }} />
+                    {formatDateShort(item.startDate)} – {formatDateShort(addDaysISO(item.startDate, item.days))}
+                  </div>
+                )}
                 <div className="gs-qty">
                   <button className="gs-qtybtn" onClick={() => onChangeQty(item.cartKey, -1)}><Minus size={11} /></button>
                   <span className="gs-qtyval">{item.qty}</span>
@@ -2283,7 +2365,7 @@ function OrderRow({ order, products, expanded, onToggle, onMarkPaid, onDelete })
                   <div>
                     <div>
                       {it.name} × {it.qty}
-                      {it.mode === "rent" && ` (${it.days}-day rental)`}
+                      {it.mode === "rent" && ` (${it.days}-day rental${it.startDate ? `, from ${formatDateShort(it.startDate)}` : ""})`}
                       {" — "}{inr(it.price * it.qty)}
                     </div>
                     <div style={{ fontSize: 10.5, color: "var(--muted)" }}>
