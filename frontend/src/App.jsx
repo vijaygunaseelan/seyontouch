@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import * as api from "./api.js";
 import instagramQR from "./assets/instagram-qr.png";
-import footerBadge from './assets/footer_img.jpeg';
 
 // The store's password check now happens server-side (see Django's
 // AdminLoginView) — the browser only ever holds the signed token it gets
@@ -47,27 +46,13 @@ const TOKENS = `
     --gold-ink: #072E4E;
     --green: #027F7B;
     --coral: #C6482F;
-
-    @font-face {
-      font-family: 'TT Drugs';
-      src: url('/fonts/TTDrugs-Regular.woff2') format('woff2'),
-           url('/fonts/TTDrugs-Regular.woff') format('woff');
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-    @font-face {
-      font-family: 'TT Drugs';
-      src: url('/fonts/TTDrugs-Bold.woff2') format('woff2'),
-           url('/fonts/TTDrugs-Bold.woff') format('woff');
-      font-weight: 700;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    --font-display: 'TT Drugs', 'Bricolage Grotesque', sans-serif;
-    --font-body: 'TT Drugs', 'Space Grotesk', sans-serif;
-    --font-mono: 'TT Drugs', 'IBM Plex Mono', monospace;
+    /* Stand-in for TT Drugs (paid font, not embeddable here). If you own a TT Drugs
+       license, add @font-face rules above this .gs-root block (top-level, not nested)
+       pointing at your hosted .woff2 files, then change 'Bricolage Grotesque' /
+       'Space Grotesk' / 'IBM Plex Mono' below to 'TT Drugs'. */
+    --font-display: 'Bricolage Grotesque', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
 
     background-color: var(--bg);
     color: var(--ink);
@@ -78,7 +63,6 @@ const TOKENS = `
     display: flex;
     flex-direction: column;
   }
-
   .gs-root * { box-sizing: border-box; }
   .gs-root button { font-family: inherit; cursor: pointer; }
   .gs-root ::selection { background: var(--gold); color: var(--gold-ink); }
@@ -180,6 +164,7 @@ const TOKENS = `
   .gs-shoptab:hover { border-color: var(--gold); color: var(--ink); }
   .gs-shoptab.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
+  /* ---------- CATEGORY TILES (square cards, full-width label strip) ---------- */
   .gs-catchips { display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px; margin-bottom: 20px; scrollbar-width: thin; }
   .gs-catcard {
     flex-shrink: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0;
@@ -206,7 +191,8 @@ const TOKENS = `
     display: flex; align-items: center; justify-content: center;
     background: #072E4E;
   }
-  .gs-catcard.active .gs-catcard-label { color: #FFFFFF; font-weight: 700; background: #072e4e; }
+  .gs-catcard.active .gs-catcard-label { color: #FFFFFF; font-weight: 700; background: #041a2e; }
+
   .gs-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px;
   }
@@ -551,14 +537,15 @@ const TOKENS = `
     font-size: 12px; color: #a86a10; line-height: 1.5;
   }
 
+  /* ---------- FOOTER ---------- */
   .gs-footer {
     margin-top: 40px; background: #072E4E; border-top: 1px solid rgba(255,255,255,0.12);
   }
   .gs-footer-inner {
-      max-width: 1160px; margin: 0 auto; padding: 36px 24px 24px;
-      display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
-      align-items: flex-start;
-    }
+    max-width: 1160px; margin: 0 auto; padding: 36px 24px 24px;
+    display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between;
+    align-items: flex-start;
+  }
   .gs-footer-col { display: flex; flex-direction: column; gap: 10px; min-width: 180px; }
   .gs-footer-col-title {
     font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
@@ -643,6 +630,7 @@ const CATEGORIES = [
   "Temple Jewels",
   "Chokers",
   "Ear Chain",
+  "Earrings",
 ];
 // The demo catalog now lives server-side (store/seed_data.py) as the
 // single source of truth for both the initial migration and the admin
@@ -1391,6 +1379,7 @@ const CATEGORY_IMAGES = {
   "Anti-Tarnish Bracelets": "/categories/anti-tarnish-bracelets.jpg",
   "Anti-Tarnish Chains": "/categories/anti-tarnish-chains.jpg",
   "Bangles": "/categories/bangles.jpg",
+  "Earrings": "/categories/earrings.jpg",
 };
 
 // `sources` is an ordered list of image URLs to try for this tile (e.g. the
@@ -2128,6 +2117,7 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
               <OrderRow
                 key={o.id}
                 order={o}
+                products={products}
                 expanded={expandedOrder === o.id}
                 onToggle={() => setExpandedOrder(expandedOrder === o.id ? null : o.id)}
                 onMarkPaid={onMarkPaid}
@@ -2201,11 +2191,21 @@ function AnalyticsPanel({ analytics, loading }) {
   );
 }
 
-function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
+// Snapshot data on an order (image/sku) can be missing if the product
+// hadn't been filled in with a photo/SKU yet at the time it was purchased.
+// currentProduct() looks up the live product record by id so that filling
+// in the photo/SKU later on the product also fixes how past orders
+// display, without needing to touch any stored order data.
+function OrderRow({ order, products, expanded, onToggle, onMarkPaid, onDelete }) {
   const c = order.customer || {};
   const addressLine = [c.address1, c.address2].filter(Boolean).join(", ");
   const cityLine = [c.city, c.state, c.pincode].filter(Boolean).join(", ");
   const paid = order.status === "paid";
+
+  function currentProduct(itemId) {
+    return products?.find((p) => p.id === itemId);
+  }
+
   return (
     <div className="gs-orderrow">
       <button className="gs-row gs-order-summary" onClick={onToggle} style={{ gridTemplateColumns: "1fr 1fr 1fr 90px 70px 24px", width: "100%", textAlign: "left", background: "none", border: "none", borderBottom: "1px solid var(--line)", cursor: "pointer" }}>
@@ -2247,45 +2247,50 @@ function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
           </div>
           <div className="gs-orderdetail-col">
             <div className="gs-orderdetail-label">Items</div>
-            {order.items.map((it, i) => (
-              <div
-                className="gs-orderdetail-line"
-                key={i}
-                style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}
-              >
+            {order.items.map((it, i) => {
+              const live = currentProduct(it.id);
+              const image = it.image || live?.image || "";
+              const sku = it.sku || live?.sku || "";
+              return (
                 <div
-                  style={{
-                    width: 40, height: 40, borderRadius: 6, flexShrink: 0, overflow: "hidden",
-                    background: "var(--paper)", border: "1px solid var(--line)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
+                  className="gs-orderdetail-line"
+                  key={i}
+                  style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}
                 >
-                  {it.image ? (
-                    <img
-                      src={it.image}
-                      alt=""
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      onError={(e) => { e.target.style.display = "none"; }}
-                    />
-                  ) : (
-                    <ImageOff size={16} style={{ opacity: 0.4 }} />
-                  )}
-                </div>
-                <div>
+                  <div
+                    style={{
+                      width: 40, height: 40, borderRadius: 6, flexShrink: 0, overflow: "hidden",
+                      background: "var(--paper)", border: "1px solid var(--line)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >
+                    {image ? (
+                      <img
+                        src={image}
+                        alt=""
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        onError={(e) => { e.target.style.display = "none"; }}
+                      />
+                    ) : (
+                      <ImageOff size={16} style={{ opacity: 0.4 }} />
+                    )}
+                  </div>
                   <div>
-                    {it.name} × {it.qty}
-                    {it.mode === "rent" && ` (${it.days}-day rental)`}
-                    {" — "}{inr(it.price * it.qty)}
+                    <div>
+                      {it.name} × {it.qty}
+                      {it.mode === "rent" && ` (${it.days}-day rental)`}
+                      {" — "}{inr(it.price * it.qty)}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: "var(--muted)" }}>
+                      SKU: {sku || "—"}
+                    </div>
+                    {it.id && (
+                      <div style={{ fontSize: 10.5, color: "var(--muted)" }}>ID: {it.id}</div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 10.5, color: "var(--muted)" }}>
-                    SKU: {it.sku || "—"}
-                  </div>
-                  {it.id && (
-                    <div style={{ fontSize: 10.5, color: "var(--muted)" }}>ID: {it.id}</div>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="gs-orderdetail-col">
             <div className="gs-orderdetail-label">Payment</div>
