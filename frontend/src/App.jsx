@@ -592,6 +592,8 @@ const TOKENS = `
     .gs-catcard-label { font-size: 10px; max-width: 100%; padding: 6px 4px; min-height: 30px; }
     .gs-card-name { font-size: 15px; }
     .gs-card-desc { display: none; }
+    .gs-card-foot { flex-direction: column; align-items: stretch; gap: 8px; }
+    .gs-addbtn, .gs-rentconfirm { width: 100%; justify-content: center; }
     .gs-tag { font-size: 11.5px; padding: 5px 8px 5px 11px; }
     .gs-cartbtn { display: none; }
     .gs-row { grid-template-columns: 40px 1fr 70px; }
