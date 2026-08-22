@@ -2251,20 +2251,34 @@ function OrderRow({ order, expanded, onToggle, onMarkPaid, onDelete }) {
               <div
                 className="gs-orderdetail-line"
                 key={i}
-                style={{ display: "flex", alignItems: "center", gap: 8 }}
+                style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10 }}
               >
-                {it.image && (
-                  <img
-                    src={it.image}
-                    alt=""
-                    style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 5, flexShrink: 0 }}
-                  />
-                )}
+                <div
+                  style={{
+                    width: 40, height: 40, borderRadius: 6, flexShrink: 0, overflow: "hidden",
+                    background: "var(--paper)", border: "1px solid var(--line)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {it.image ? (
+                    <img
+                      src={it.image}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      onError={(e) => { e.target.style.display = "none"; }}
+                    />
+                  ) : (
+                    <ImageOff size={16} style={{ opacity: 0.4 }} />
+                  )}
+                </div>
                 <div>
                   <div>
-                    {it.name}{it.sku && ` (${it.sku})`} × {it.qty}
+                    {it.name} × {it.qty}
                     {it.mode === "rent" && ` (${it.days}-day rental)`}
                     {" — "}{inr(it.price * it.qty)}
+                  </div>
+                  <div style={{ fontSize: 10.5, color: "var(--muted)" }}>
+                    SKU: {it.sku || "—"}
                   </div>
                   {it.id && (
                     <div style={{ fontSize: 10.5, color: "var(--muted)" }}>ID: {it.id}</div>
