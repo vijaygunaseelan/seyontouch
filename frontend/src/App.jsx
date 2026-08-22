@@ -118,7 +118,9 @@ const TOKENS = `
   .gs-adminicon {
     width: 34px; height: 34px; border-radius: 50%; border: 1px solid transparent;
     background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
   }
+  .gs-adminicon-logo { width: 20px; height: 20px; object-fit: contain; display: block; }
   .gs-adminicon:hover { border-color: var(--line); color: var(--ink); }
   .gs-adminicon.active { background: var(--gold); color: var(--gold-ink); }
 
@@ -1128,7 +1130,7 @@ export default function GeneralStoreApp() {
                 title="Admin"
                 aria-label="Admin"
               >
-                <Settings size={16} />
+                <img src={LOGO_URI} alt="" className="gs-adminicon-logo" />
               </button>
             )}
           </div>
@@ -2058,7 +2060,6 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
           {adminTab === "products" && (
             <button className="gs-addproductbtn" onClick={onAdd}><Plus size={15} /> Add product</button>
           )}
-          <button className="gs-logoutbtn" onClick={onReset}><RotateCcw size={13} /> Reset demo catalog</button>
           <button className="gs-logoutbtn" onClick={onLogout}><Lock size={13} /> Log out</button>
         </div>
       </div>
