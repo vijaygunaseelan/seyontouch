@@ -14,10 +14,13 @@ import instagramQR from "./assets/instagram-qr.png";
 const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 
 // Flat shipping fee (₹) added on top of the cart subtotal at checkout.
-// Keep this in sync with SHIPPING_FEE_RUPEES in backend/store/pricing.py —
-// that's the value actually charged; this one is just what's displayed
-// before the order is created.
+// Keep these in sync with the shipping logic in backend/store/pricing.py —
+// that's what's actually charged; these are just what's displayed before
+// the order is created. RENT_SHIPPING_FEE applies when every item in the
+// basket is a rental (pickup/return logistics cost more); mixed or
+// buy-only baskets use the regular SHIPPING_FEE.
 const SHIPPING_FEE = 60;
+const RENT_SHIPPING_FEE = 160;
 
 // Store contact details shown in the site footer.
 const STORE_PHONE = "9611975252";
@@ -840,6 +843,13 @@ export default function GeneralStoreApp() {
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.qty, 0);
   const subtotal = cartItems.reduce((sum, i) => sum + i.qty * i.unitPrice, 0);
+  // Rent-only baskets (every line item is a rental) get the higher shipping
+  // fee; anything with at least one bought item — or an empty cart — falls
+  // back to the regular fee.
+  const shippingFee =
+    cartItems.length > 0 && cartItems.every((i) => i.mode === "rent")
+      ? RENT_SHIPPING_FEE
+      : SHIPPING_FEE;
 
   function cartQtyForProduct(productId) {
     return Object.values(cart)
@@ -991,7 +1001,7 @@ export default function GeneralStoreApp() {
         sku: i.sku,
         image: i.image,
       })),
-      total: subtotal + SHIPPING_FEE,
+      total: subtotal + shippingFee,
     };
     try {
       const order = await api.createOrder(orderPayload);
@@ -1240,6 +1250,7 @@ export default function GeneralStoreApp() {
           <CartDrawer
             items={cartItems}
             subtotal={subtotal}
+            shippingFee={shippingFee}
             onClose={() => setCartOpen(false)}
             onChangeQty={changeQty}
             onRemove={removeFromCart}
@@ -1269,7 +1280,7 @@ export default function GeneralStoreApp() {
             )}
             {checkoutStage === "payment" && razorpayConfig && (
               <RazorpayPaymentCard
-                total={subtotal + SHIPPING_FEE}
+                total={subtotal + shippingFee}
                 onPay={payNow}
                 paying={paying}
                 onBack={backToAddress}
@@ -1890,7 +1901,7 @@ function StoreFooter() {
 }
 
 /* ---------------- CART ---------------- */
-function CartDrawer({ items, subtotal, onClose, onChangeQty, onRemove, onCheckout }) {
+function CartDrawer({ items, subtotal, shippingFee, onClose, onChangeQty, onRemove, onCheckout }) {
   return (
     <div className="gs-drawer">
       <div className="gs-drawer-head">
@@ -1938,8 +1949,8 @@ function CartDrawer({ items, subtotal, onClose, onChangeQty, onRemove, onCheckou
       {items.length > 0 && (
         <div className="gs-drawer-foot">
           <div className="gs-totalrow"><span>Subtotal</span><span>{inr(subtotal)}</span></div>
-          <div className="gs-totalrow"><span>Shipping</span><span>{inr(SHIPPING_FEE)}</span></div>
-          <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal + SHIPPING_FEE)}</span></div>
+          <div className="gs-totalrow"><span>Shipping</span><span>{inr(shippingFee)}</span></div>
+          <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal + shippingFee)}</span></div>
           <button className="gs-checkoutbtn" onClick={onCheckout}>
             Proceed to Buy
           </button>
