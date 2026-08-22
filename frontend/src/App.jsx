@@ -1790,7 +1790,7 @@ function StoreFooter() {
           <div className="gs-footer-col-title">Policies</div>
           <a className="gs-footer-link" href="/privacy-policy">Privacy Policy</a>
           <a className="gs-footer-link" href="/terms-and-conditions">Terms & Conditions</a>
-          <a className="gs-footer-link" href="/shipping-policy">Shipping & Delivery</a>
+          <a className="gs-footer-link" href="/policy/shipping_and_delivery.pdf" target="_blank" rel="noreferrer">Shipping & Delivery</a>
           <a className="gs-footer-link" href="/refund-policy">Refund & Exchange</a>
         </div>
 
