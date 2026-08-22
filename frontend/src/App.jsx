@@ -454,10 +454,10 @@ const TOKENS = `
   .gs-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
   .gs-table-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .gs-row { display: grid; grid-template-columns: 52px 1.6fr 0.9fr 0.7fr 0.9fr 84px; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .gs-row { display: grid; grid-template-columns: 100px 1.6fr 0.9fr 0.7fr 0.9fr 84px; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
   .gs-row.head { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-2); padding-top: 14px; padding-bottom: 14px; }
   .gs-row:last-child { border-bottom: none; }
-  .gs-row img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+  .gs-row img { width: 90px; height: 90px; object-fit: cover; border-radius: 6px; }
   .gs-row-name { font-weight: 600; font-size: 13.5px; }
   .gs-row-cat { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
   .gs-row-price { font-family: var(--font-mono); font-size: 13px; }
