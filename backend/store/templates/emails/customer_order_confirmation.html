@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="margin:0; padding:0; background:#f5f2ea; font-family: Arial, Helvetica, sans-serif; color:#072E4E;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f2ea; padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background:#ffffff; border-radius:10px; overflow:hidden; border:1px solid #e3ddca;">
+          <tr>
+            <td style="background:#072E4E; padding:20px 28px;">
+              <img src="https://user23766.na.imgto.link/public/20260820/favicon-192.avif" width="34" height="34" alt="Seyon Touch" style="vertical-align:middle; border-radius:6px;" />
+              <span style="color:#ffffff; font-size:18px; font-weight:bold; margin-left:10px; vertical-align:middle;">Seyon Touch</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 28px 8px;">
+              <p style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#8c8570; margin:0 0 6px;">Order confirmed</p>
+              <h1 style="font-size:22px; margin:0 0 6px; color:#072E4E;">Thanks{% if customer.name %}, {{ customer.name }}{% endif %}!</h1>
+              <p style="font-size:14px; color:#5A7A86; line-height:1.6; margin:0 0 20px;">
+                Your order <strong>{{ order.id }}</strong> is confirmed and being packed. Here's a copy of your receipt.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px dashed #d8d1ba;">
+                {% for item in items %}
+                <tr>
+                  <td style="padding:12px 0; border-bottom:1px dashed #d8d1ba; font-size:13.5px; color:#072E4E;">
+                    {{ item.name }} &times; {{ item.qty }}
+                    {% if item.mode == "rent" %}<br /><span style="font-size:11.5px; color:#027F7B;">{{ item.days }}-day rental{% if item.startDate %}, from {{ item.startDate }}{% endif %}</span>{% endif %}
+                  </td>
+                  <td style="padding:12px 0; border-bottom:1px dashed #d8d1ba; font-size:13.5px; color:#072E4E; text-align:right; white-space:nowrap;">
+                    &#8377;{{ item.line_total }}
+                  </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td style="padding:14px 0 4px; font-size:15px; font-weight:bold; color:#072E4E;">Total paid</td>
+                  <td style="padding:14px 0 4px; font-size:15px; font-weight:bold; color:#072E4E; text-align:right;">&#8377;{{ order.total }}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 28px 0;">
+              <p style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:#8c8570; margin:0 0 8px;">Delivery address</p>
+              <p style="font-size:13.5px; color:#072E4E; line-height:1.6; margin:0 0 20px;">
+                {{ customer.name }}<br />
+                {% if address_line %}{{ address_line }}<br />{% endif %}
+                {% if city_line %}{{ city_line }}<br />{% endif %}
+                {{ customer.phone }}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 28px 28px;">
+              <p style="font-size:12.5px; color:#5A7A86; line-height:1.6; margin:0;">
+                Questions about your order? Just reply to this email, or reach us at
+                <a href="mailto:{{ store_email }}" style="color:#C3944E;">{{ store_email }}</a> or
+                <a href="tel:{{ store_phone }}" style="color:#C3944E;">{{ store_phone }}</a>.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#f4efe4; padding:14px 28px; text-align:center;">
+              <p style="font-size:11px; color:#8c8570; margin:0;">&copy; Seyon Touch &mdash; Designer jewelry, made to be worn.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

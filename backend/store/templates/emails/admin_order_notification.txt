@@ -1,0 +1,20 @@
+NEW PAID ORDER
+
+{{ order.id }} -- Rs.{{ order.total }}
+Payment ID: {{ order.payment_id }}
+
+CUSTOMER
+{{ customer.name }}
+{{ customer.phone }}
+{{ customer.email }}
+
+{% if address_line or city_line %}DELIVER TO
+{% if address_line %}{{ address_line }}
+{% endif %}{% if city_line %}{{ city_line }}
+{% endif %}
+{% endif %}ITEMS
+{% for item in items %}- {{ item.name }} x {{ item.qty }}{% if item.mode == "rent" %} ({{ item.days }}-day rental){% endif %}{% if item.sku %} [SKU: {{ item.sku }}]{% endif %} -- Rs.{{ item.line_total }}
+{% endfor %}
+Total: Rs.{{ order.total }}
+
+Manage this order from the admin panel at seyontouch.in/admin.

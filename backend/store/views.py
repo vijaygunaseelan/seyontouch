@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .emails import send_order_emails
 from .models import Order, Product
 from .permissions import IsAdminToken, make_admin_token
 from .pricing import CartError, price_cart
@@ -167,10 +168,19 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return OrderStatusUpdateSerializer
 
     def update(self, request, *args, **kwargs):
+        # An admin manually marking an order "paid" (the fallback path,
+        # for when a customer paid outside Razorpay verification somehow
+        # completing) should trigger the same confirmation/notification
+        # emails a normal Razorpay-verified payment would — the customer
+        # still deserves a receipt either way.
+        was_paid = self.get_object().status == "paid"
         response = super().update(request, *args, **kwargs)
+        order = self.get_object()
+        if not was_paid and order.status == "paid":
+            send_order_emails(order)
         # Respond with the full order shape (not just status/utr) so the
         # frontend can just splice this straight back into its order list.
-        response.data = OrderSerializer(self.get_object()).data
+        response.data = OrderSerializer(order).data
         return response
 
     def destroy(self, request, *args, **kwargs):
@@ -275,6 +285,9 @@ class RazorpayVerifyView(APIView):
             return Response({"detail": "Payment doesn't match this order."}, status=status.HTTP_400_BAD_REQUEST)
 
         if order.status == "paid":
+            # Already verified by an earlier call (e.g. the customer's
+            # browser retried after a flaky response) — the emails for
+            # this order have already gone out, so don't send them again.
             return Response(OrderSerializer(order).data)
 
         try:
@@ -290,6 +303,13 @@ class RazorpayVerifyView(APIView):
         order.payment_id = razorpay_payment_id
         order.razorpay_signature = razorpay_signature
         order.save(update_fields=["status", "payment_id", "razorpay_signature"])
+
+        # First time this order has ever been marked paid — send the
+        # customer their confirmation and notify the store. Best-effort:
+        # see emails.send_order_emails for why this can't fail the
+        # response even if SMTP is down or misconfigured.
+        send_order_emails(order)
+
         return Response(OrderSerializer(order).data)
 
 

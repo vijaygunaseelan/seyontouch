@@ -55,6 +55,40 @@ RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 
 
+# --- Order emails -----------------------------------------------------
+# Sent once an order's payment is verified (see store/views.py's
+# RazorpayVerifyView and store/emails.py): a confirmation to the customer,
+# and a "new order" notification to the store.
+#
+# Using Gmail: EMAIL_HOST_USER is the full Gmail address, and
+# EMAIL_HOST_PASSWORD must be a 16-character *App Password* — not your
+# normal Gmail login password. Gmail no longer accepts the real account
+# password for SMTP. Generate one at:
+# https://myaccount.google.com/apppasswords (requires 2-Step Verification
+# to be turned on for the account first). Add both to backend/.env:
+#
+#   EMAIL_HOST_USER=youraddress@gmail.com
+#   EMAIL_HOST_PASSWORD=your16charapppassword
+#   STORE_NOTIFICATION_EMAIL=seyontouch@gmail.com   (optional, defaults below)
+#
+# Until EMAIL_HOST_USER is set, emails aren't sent over SMTP at all —
+# they're printed to the runserver console instead, so the feature can be
+# built/tested locally before real credentials exist.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or EMAIL_HOST_USER or "no-reply@seyontouch.in"
+STORE_NOTIFICATION_EMAIL = os.environ.get("STORE_NOTIFICATION_EMAIL", "seyontouch@gmail.com")
+
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"
+    if EMAIL_HOST_USER
+    else "django.core.mail.backends.console.EmailBackend"
+)
+
+
 # --- Applications ---------------------------------------------------------
 
 INSTALLED_APPS = [
@@ -90,7 +124,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # Lets Django serve the built frontend/dist/index.html directly.
+        # Lets Django serve the built frontend/dist/index.html directly,
+        # and — via APP_DIRS below — pick up store/templates/emails/*.html
+        # for the order emails.
         "DIRS": [FRONTEND_DIST],
         "APP_DIRS": True,
         "OPTIONS": {
