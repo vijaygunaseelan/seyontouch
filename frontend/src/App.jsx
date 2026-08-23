@@ -422,6 +422,7 @@ const TOKENS = `
     position: fixed; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .gs-detailcard {
+    position: relative;
     width: 100%; max-width: 760px; max-height: 88vh; background: var(--paper); color: var(--ink);
     border-radius: 14px; overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.5);
     animation: gsPop .18s ease; display: flex; flex-direction: column;
