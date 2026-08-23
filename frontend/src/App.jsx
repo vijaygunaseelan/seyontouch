@@ -808,6 +808,15 @@ export default function GeneralStoreApp() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  // Every view swap (Shop ↔ Admin ↔ a policy page) is a client-side
+  // change, not a real page load, so the browser keeps whatever scroll
+  // position the user was at. Jump back to the top each time, the way a
+  // real page navigation would.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [view]);
+
   const [products, setProducts] = useState(null);
   const [orders, setOrders] = useState([]);
   const [cart, setCart] = useState({});
