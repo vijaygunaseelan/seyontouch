@@ -589,6 +589,46 @@ const TOKENS = `
 
   .gs-bottombar { display: none; }
 
+  /* ---------- POLICY PAGES (Refund, Shipping & Delivery) ---------- */
+  .gs-policypage { max-width: 760px; margin: 0 auto; padding: 6px 0 20px; }
+  .gs-policy-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted-2); background: none; border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 999px; margin-bottom: 28px;
+  }
+  .gs-policy-back:hover { border-color: var(--gold); color: var(--gold); }
+  .gs-policy-eyebrow { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.14em; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .gs-policy-title { font-family: var(--font-display); font-size: 32px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 14px; }
+  .gs-policy-intro { color: var(--muted-2); font-size: 15px; max-width: 560px; margin-bottom: 36px; }
+  .gs-policy-list { display: flex; flex-direction: column; }
+  .gs-policy-item { display: flex; gap: 16px; padding: 22px 0; border-top: 1px dashed var(--line); }
+  .gs-policy-item:last-child { border-bottom: 1px dashed var(--line); }
+  .gs-policy-icon {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; background: var(--panel);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .gs-policy-icon.warn { background: #fdf1e0; }
+  .gs-policy-icon.stop { background: #fbe9e6; }
+  .gs-policy-body h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0 0 6px; color: var(--ink); }
+  .gs-policy-body p { margin: 0; color: var(--muted-2); font-size: 14px; line-height: 1.6; }
+  .gs-policy-body p + p { margin-top: 8px; }
+  .gs-policy-highlight {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 20px; margin: 32px 0; font-size: 13.5px; color: var(--muted-2);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .gs-policy-highlight.green { background: #eef8f0; border-color: rgba(2,127,123,0.2); }
+  .gs-policy-highlight strong { color: var(--ink); }
+  .gs-policy-closing { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted-2); }
+  .gs-policy-closing strong { color: var(--ink); font-family: var(--font-display); font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .gs-policy-title { font-size: 24px; }
+    .gs-policy-item { gap: 12px; }
+    .gs-policy-icon { width: 38px; height: 38px; font-size: 17px; }
+  }
+
   .gs-loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; color: var(--muted); flex-direction: column; gap: 10px; }
   .gs-spin { animation: gsSpin 1s linear infinite; }
   @keyframes gsSpin { to { transform: rotate(360deg) } }
@@ -726,10 +766,26 @@ function emptyProduct() {
 // /admin is its own real URL (not just an in-page toggle): typing it
 // directly, refreshing on it, or bookmarking it all land you back in the
 // admin view. Django's catch-all route already serves the same
-// index.html for any non-/api, non-/django-admin path, so this only
-// needs client-side history handling — no backend routing changes.
+// index.html for any non-/api, non-/django-admin path — confirmed by the
+// fact that /privacy-policy also lands here — so every view that should
+// have its own URL needs an explicit entry below, or the app will
+// silently fall back to the store view instead of 404-ing or rendering
+// the right page. This only needs client-side history handling — no
+// backend routing changes.
+const VIEW_PATHS = {
+  "/admin": "admin",
+  "/refund-policy": "refund-policy",
+  "/shipping-and-delivery": "shipping-delivery",
+};
+const PATH_FOR_VIEW = {
+  admin: "/admin",
+  "refund-policy": "/refund-policy",
+  "shipping-delivery": "/shipping-and-delivery",
+  store: "/",
+};
 function viewForPath(pathname) {
-  return pathname.replace(/\/+$/, "") === "/admin" ? "admin" : "store";
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  return VIEW_PATHS[clean] || "store";
 }
 
 export default function GeneralStoreApp() {
@@ -739,7 +795,7 @@ export default function GeneralStoreApp() {
   // keeps the two in sync when the user hits back/forward.
   const setView = useCallback((next) => {
     setViewState(next);
-    const path = next === "admin" ? "/admin" : "/";
+    const path = PATH_FOR_VIEW[next] || "/";
     if (window.location.pathname !== path) {
       window.history.pushState({ view: next }, "", path);
     }
@@ -1175,6 +1231,11 @@ export default function GeneralStoreApp() {
     );
   }
 
+  // Store, and the standalone policy pages, all share the shopper-facing
+  // header/footer chrome (cart access, shop nav, footer links) — admin and
+  // the login gate don't.
+  const isPublicView = view === "store" || view === "refund-policy" || view === "shipping-delivery";
+
   return (
     <div className="gs-root">
       <style>{TOKENS}</style>
@@ -1189,7 +1250,7 @@ export default function GeneralStoreApp() {
             <button className={`gs-navbtn ${view === "store" ? "active" : ""}`} onClick={() => setView("store")}>
               <StoreIcon size={14} /> Shop
             </button>
-            {view === "store" && (
+            {isPublicView && (
               <button className="gs-cartbtn" onClick={() => setCartOpen(true)}>
                 <ShoppingBag size={15} /> Cart
                 {cartCount > 0 && <span className="gs-badge">{cartCount}</span>}
@@ -1212,6 +1273,10 @@ export default function GeneralStoreApp() {
       <main className="gs-main">
         {view === "store" ? (
           <StoreView products={products} onAdd={addToCart} />
+        ) : view === "refund-policy" ? (
+          <RefundPolicyPage onBack={() => setView("store")} />
+        ) : view === "shipping-delivery" ? (
+          <ShippingDeliveryPage onBack={() => setView("store")} />
         ) : isAdmin ? (
           <AdminView
             products={products}
@@ -1242,7 +1307,8 @@ export default function GeneralStoreApp() {
         )}
       </main>
 
-      {view === "store" && <StoreFooter />}
+      {isPublicView && <StoreFooter onNavigate={setView} />}
+
 
       {cartOpen && (
         <>
@@ -1860,8 +1926,120 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
   );
 }
 
+/* ---------------- POLICY PAGES ---------------- */
+function RefundPolicyPage({ onBack }) {
+  return (
+    <div className="gs-policypage">
+      <button className="gs-policy-back" onClick={onBack}><ArrowLeft size={13} /> Back to shop</button>
+      <div className="gs-policy-eyebrow">Policies</div>
+      <h1 className="gs-policy-title">Return &amp; Refund Policy</h1>
+      <p className="gs-policy-intro">At Seyon Touch, we carefully inspect and securely pack every jewellery order before dispatch.</p>
+
+      <div className="gs-policy-list">
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon stop">🚫</div>
+          <div className="gs-policy-body">
+            <h2>No COD</h2>
+            <p>We currently do not offer Cash on Delivery (COD). All orders must be prepaid.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon stop">❌</div>
+          <div className="gs-policy-body">
+            <h2>No Refunds for Change of Mind</h2>
+            <p>We do not accept returns or refunds for change of mind, incorrect product selection, or personal preference.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon warn">📦</div>
+          <div className="gs-policy-body">
+            <h2>Unboxing Video Is Mandatory</h2>
+            <p>For your protection, please record a clear, continuous unboxing video while opening your package. The video should clearly show the package, shipping label, and the jewellery inside.</p>
+            <p>Without a valid unboxing video, damage or missing-item claims may not be accepted.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon">💔</div>
+          <div className="gs-policy-body">
+            <h2>Damaged Product</h2>
+            <p>If your jewellery arrives damaged, please contact us with the clear unboxing video as proof.</p>
+            <p>After verification and approval, the eligible refund amount will be processed within 3 working days.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="gs-policy-highlight">
+        <span>⚠️</span>
+        <span><strong>Please do not discard the packaging</strong> until your order has been fully checked.</span>
+      </div>
+
+      <div className="gs-policy-closing">
+        Your trust matters to us, and we are committed to ensuring a safe and pleasant shopping experience.<br />
+        <strong>— Team Seyon Touch</strong>
+      </div>
+    </div>
+  );
+}
+
+function ShippingDeliveryPage({ onBack }) {
+  return (
+    <div className="gs-policypage">
+      <button className="gs-policy-back" onClick={onBack}><ArrowLeft size={13} /> Back to shop</button>
+      <div className="gs-policy-eyebrow">Policies</div>
+      <h1 className="gs-policy-title">Shipping &amp; Delivery Policy</h1>
+      <p className="gs-policy-intro">At Seyon Touch, we are committed to delivering your jewellery safely, securely, and on time.</p>
+
+      <div className="gs-policy-list">
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon">🚚</div>
+          <div className="gs-policy-body">
+            <h2>Shipping Partner</h2>
+            <p>All orders are shipped through our trusted courier partners to ensure safe, reliable, and timely delivery across India.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon">⏱️</div>
+          <div className="gs-policy-body">
+            <h2>Delivery Time</h2>
+            <p>Orders are generally delivered within 3 to 5 working days from the date of dispatch. Delivery times may vary slightly depending on the delivery location and courier service.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon">📦</div>
+          <div className="gs-policy-body">
+            <h2>Order Processing</h2>
+            <p>Orders are carefully packed and processed before dispatch. Once your order has been shipped, you will receive the relevant tracking details so you can easily track your package.</p>
+          </div>
+        </div>
+        <div className="gs-policy-item">
+          <div className="gs-policy-icon">🔒</div>
+          <div className="gs-policy-body">
+            <h2>Safe &amp; Secure Packaging</h2>
+            <p>Every jewellery order is carefully packed and securely protected to ensure it reaches you safely and in perfect condition.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="gs-policy-highlight green">
+        <span>✨</span>
+        <span>We truly value your trust and look forward to making every jewellery purchase a delightful experience.</span>
+      </div>
+
+      <div className="gs-policy-closing">
+        Thank you for choosing <strong>Seyon Touch</strong>!
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- FOOTER ---------------- */
-function StoreFooter() {
+function StoreFooter({ onNavigate }) {
+  function goTo(view) {
+    return (e) => {
+      e.preventDefault();
+      onNavigate(view);
+    };
+  }
   return (
     <footer className="gs-footer">
       <div className="gs-footer-inner">
@@ -1886,8 +2064,8 @@ function StoreFooter() {
           <div className="gs-footer-col-title">Policies</div>
           <a className="gs-footer-link" href="/privacy-policy">Privacy Policy</a>
           <a className="gs-footer-link" href="/terms-and-conditions">Terms & Conditions</a>
-          <a className="gs-footer-link" href="./policy/shipping-and-delivery.html" target="_blank" rel="noreferrer">Shipping & Delivery</a>
-          <a className="gs-footer-link" href="./policy/refund-policy.html" target="_blank" rel="noreferrer">Refund & Exchange</a>
+          <a className="gs-footer-link" href="/shipping-and-delivery" onClick={goTo("shipping-delivery")}>Shipping & Delivery</a>
+          <a className="gs-footer-link" href="/refund-policy" onClick={goTo("refund-policy")}>Refund & Exchange</a>
         </div>
 
         <div className="gs-footer-col gs-footer-qr">
