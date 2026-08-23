@@ -1824,6 +1824,18 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  // Prevent the page behind the modal from scrolling while it's open.
+  // Restores whatever the previous overflow value was (rather than just
+  // clearing it) so this stays well-behaved if it's ever nested inside
+  // something else that also manages overflow.
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   const outOfStock = product.stock <= 0;
   const canRent = product.listingType === "rent" || product.listingType === "both";
   const canSell = (product.listingType || "sale") !== "rent";
