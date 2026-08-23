@@ -1849,9 +1849,6 @@ function ProductDetailModal({ product, initialMode, onAdd, onClose }) {
             ) : (
               <div className="gs-detailimg-noimg"><ImageOff size={40} /></div>
             )}
-            <div className="gs-detailtag">
-              {isRentMode ? `${inr(product.rentPrice)}/day` : inr(product.price)}
-            </div>
           </div>
           <div className="gs-detailinfo">
             <div className="gs-detailcat">{product.category}</div>
