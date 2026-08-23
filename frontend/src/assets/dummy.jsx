@@ -17,7 +17,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 // Keep this in sync with SHIPPING_FEE_RUPEES in backend/store/pricing.py —
 // that's the value actually charged; this one is just what's displayed
 // before the order is created.
-const SHIPPING_FEE = 60;
+const SHIPPING_FEE = 0;
 
 // Store contact details shown in the site footer.
 const STORE_PHONE = "9611975252";
