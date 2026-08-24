@@ -58,33 +58,33 @@ RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 # --- Order emails -----------------------------------------------------
 # Sent once an order's payment is verified (see store/views.py's
 # RazorpayVerifyView and store/emails.py): a confirmation to the customer,
-# and a "new order" notification to the store.
+# and a "new order" notification to the store. Sent via Resend's HTTP API
+# (store/resend_backend.py) — a plain HTTPS call, so it isn't affected by
+# hosts that restrict outbound SMTP ports, and doesn't get flagged as a
+# suspicious sign-in the way SMTP from an unfamiliar server sometimes does.
 #
-# Using Gmail: EMAIL_HOST_USER is the full Gmail address, and
-# EMAIL_HOST_PASSWORD must be a 16-character *App Password* — not your
-# normal Gmail login password. Gmail no longer accepts the real account
-# password for SMTP. Generate one at:
-# https://myaccount.google.com/apppasswords (requires 2-Step Verification
-# to be turned on for the account first). Add both to backend/.env:
+# Set RESEND_API_KEY in Render's dashboard -> your service -> Environment
+# tab — Render does not read a .env file from your repo on deploy, even if
+# one exists locally and even after a restart. Sign up at
+# https://resend.com, create a key at https://resend.com/api-keys.
 #
-#   EMAIL_HOST_USER=youraddress@gmail.com
-#   EMAIL_HOST_PASSWORD=your16charapppassword
-#   STORE_NOTIFICATION_EMAIL=seyontouch@gmail.com   (optional, defaults below)
+# Until you verify a sending domain in Resend's dashboard (Resend ->
+# Domains), DEFAULT_FROM_EMAIL must stay their sandbox address
+# ("Seyon Touch <onboarding@resend.dev>"), and mail can only be delivered
+# to the email address on your own Resend account — fine for testing, not
+# for real customers yet. Once seyontouch.in is verified, set
+# DEFAULT_FROM_EMAIL to e.g. "Seyon Touch <orders@seyontouch.in>".
 #
-# Until EMAIL_HOST_USER is set, emails aren't sent over SMTP at all —
-# they're printed to the runserver console instead, so the feature can be
-# built/tested locally before real credentials exist.
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or EMAIL_HOST_USER or "no-reply@seyontouch.in"
+# Without RESEND_API_KEY set, emails print to the runserver console
+# instead of actually sending, so this can be built/tested locally before
+# a real key exists.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Seyon Touch <onboarding@resend.dev>")
 STORE_NOTIFICATION_EMAIL = os.environ.get("STORE_NOTIFICATION_EMAIL", "seyontouch@gmail.com")
 
 EMAIL_BACKEND = (
-    "django.core.mail.backends.smtp.EmailBackend"
-    if EMAIL_HOST_USER
+    "store.resend_backend.ResendEmailBackend"
+    if RESEND_API_KEY
     else "django.core.mail.backends.console.EmailBackend"
 )
 

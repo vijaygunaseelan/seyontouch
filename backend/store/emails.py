@@ -3,9 +3,10 @@ Order emails: a customer confirmation and an admin "new order" notification,
 both sent once an order is verified as paid (see views.RazorpayVerifyView).
 
 Sending is best-effort. By the time these are called, the payment has
-already succeeded and stock has already been decremented — a broken SMTP
-config or a transient network error here must never fail the checkout
-response or roll anything back. Failures are logged, not raised.
+already succeeded and stock has already been decremented — a broken
+Resend API key/config or a transient network error here must never fail
+the checkout response or roll anything back. Failures are logged, not
+raised.
 """
 
 import logging
