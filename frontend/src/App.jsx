@@ -19,7 +19,7 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 // the order is created. RENT_SHIPPING_FEE applies when every item in the
 // basket is a rental (pickup/return logistics cost more); mixed or
 // buy-only baskets use the regular SHIPPING_FEE.
-const SHIPPING_FEE = 0;
+const SHIPPING_FEE = 60;
 const RENT_SHIPPING_FEE = 160;
 
 // Store contact details shown in the site footer.
