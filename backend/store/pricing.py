@@ -11,7 +11,7 @@ class CartError(Exception):
 # only what the browser *displays* before checkout; this is what actually
 # gets charged (it's baked into the total this module returns, which is
 # what Order.total and the Razorpay order amount are built from).
-SHIPPING_FEE_RUPEES = 0
+SHIPPING_FEE_RUPEES = 60
 
 
 def price_cart(raw_items):
