@@ -2332,9 +2332,13 @@ function SuccessCard({ order, onDone }) {
         <div style={{ fontSize: 12.5, color: "#6f6a5e" }}>
           Order {order.id}{order.paymentId ? ` · Payment ${order.paymentId}` : ""}
         </div>
-        {pending && (
+        {pending ? (
           <div className="gs-modal-sub" style={{ marginTop: 4, marginBottom: 4 }}>
             We'll confirm your payment shortly and start preparing your order.
+          </div>
+        ) : (
+          <div className="gs-modal-sub" style={{ marginTop: 4, marginBottom: 4 }}>
+            Thank you for shopping with Seyon Touch! Your order is being packed with care and will be on its way soon.
           </div>
         )}
         <div className="gs-receipt">
