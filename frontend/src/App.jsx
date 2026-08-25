@@ -18,9 +18,11 @@ const ADMIN_TOKEN_STORAGE_KEY = "seyon_admin_token";
 // that's what's actually charged; these are just what's displayed before
 // the order is created. RENT_SHIPPING_FEE applies when every item in the
 // basket is a rental (pickup/return logistics cost more); mixed or
-// buy-only baskets use the regular SHIPPING_FEE.
+// buy-only baskets use the regular SHIPPING_FEE. Either way, once the
+// cart subtotal reaches FREE_SHIPPING_THRESHOLD, shipping is waived.
 const SHIPPING_FEE = 60;
 const RENT_SHIPPING_FEE = 160;
+const FREE_SHIPPING_THRESHOLD = 500;
 
 // Store contact details shown in the site footer.
 const STORE_PHONE = "9611975252";
@@ -339,6 +341,10 @@ const TOKENS = `
   .gs-drawer-foot { padding: 18px 22px 22px; border-top: 1px dashed #c9c1aa; }
   .gs-totalrow { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 14px; margin-bottom: 4px; color: #6f6a5e; }
   .gs-totalrow.grand { font-size: 17px; font-weight: 700; color: var(--ink); margin-top: 8px; }
+  .gs-freeship-note {
+    font-family: var(--font-mono); font-size: 12px; margin-bottom: 12px; padding: 8px 10px;
+    border-radius: 7px; background: #eef8f0; color: var(--green); font-weight: 600;
+  }
   .gs-checkoutbtn {
     width: 100%; margin-top: 14px; background: var(--ink); color: var(--paper); border: none;
     border-radius: 8px; padding: 13px; font-size: 14px; font-weight: 600;
@@ -911,11 +917,17 @@ export default function GeneralStoreApp() {
   const subtotal = cartItems.reduce((sum, i) => sum + i.qty * i.unitPrice, 0);
   // Rent-only baskets (every line item is a rental) get the higher shipping
   // fee; anything with at least one bought item — or an empty cart — falls
-  // back to the regular fee.
+  // back to the regular fee. Once the subtotal reaches
+  // FREE_SHIPPING_THRESHOLD, shipping is waived entirely regardless of mode.
   const shippingFee =
-    cartItems.length > 0 && cartItems.every((i) => i.mode === "rent")
+    cartItems.length === 0
+      ? 0
+      : subtotal >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : cartItems.every((i) => i.mode === "rent")
       ? RENT_SHIPPING_FEE
       : SHIPPING_FEE;
+  const amountToFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
   function cartQtyForProduct(productId) {
     return Object.values(cart)
@@ -1327,6 +1339,7 @@ export default function GeneralStoreApp() {
             items={cartItems}
             subtotal={subtotal}
             shippingFee={shippingFee}
+            amountToFreeShipping={amountToFreeShipping}
             onClose={() => setCartOpen(false)}
             onChangeQty={changeQty}
             onRemove={removeFromCart}
@@ -2098,7 +2111,7 @@ function StoreFooter({ onNavigate }) {
 }
 
 /* ---------------- CART ---------------- */
-function CartDrawer({ items, subtotal, shippingFee, onClose, onChangeQty, onRemove, onCheckout }) {
+function CartDrawer({ items, subtotal, shippingFee, amountToFreeShipping, onClose, onChangeQty, onRemove, onCheckout }) {
   return (
     <div className="gs-drawer">
       <div className="gs-drawer-head">
@@ -2145,8 +2158,15 @@ function CartDrawer({ items, subtotal, shippingFee, onClose, onChangeQty, onRemo
       </div>
       {items.length > 0 && (
         <div className="gs-drawer-foot">
+          {amountToFreeShipping > 0 ? (
+            <div className="gs-freeship-note">
+              Add {inr(amountToFreeShipping)} more to get free shipping
+            </div>
+          ) : (
+            <div className="gs-freeship-note">🎉 You've unlocked free shipping!</div>
+          )}
           <div className="gs-totalrow"><span>Subtotal</span><span>{inr(subtotal)}</span></div>
-          <div className="gs-totalrow"><span>Shipping</span><span>{inr(shippingFee)}</span></div>
+          <div className="gs-totalrow"><span>Shipping</span><span>{shippingFee === 0 ? "Free" : inr(shippingFee)}</span></div>
           <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal + shippingFee)}</span></div>
           <button className="gs-checkoutbtn" onClick={onCheckout}>
             Proceed to Buy
