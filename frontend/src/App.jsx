@@ -47,7 +47,7 @@ const TOKENS = `
     --muted: #5A7A86;
     --muted-2: #39586A;
     --line: rgba(7,46,78,0.14);
-    --gold: #072E4E;
+    --gold: #C3944E;
     --gold-ink: #072E4E;
     --green: #027F7B;
     --coral: #C6482F;
@@ -185,7 +185,8 @@ const TOKENS = `
     display: flex; align-items: center; justify-content: center;
     border: 2.5px solid transparent; transition: border-color .15s ease;
   }
-  .gs-catcard.active .gs-catcard-ring { border-color: var(--gold); }
+  .gs-catcard:hover .gs-catcard-ring { border-color: #072E4E; }
+  .gs-catcard.active .gs-catcard-ring { border-color: #072E4E; }
   .gs-catcard-img {
     width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
     background: #ddd6c4; border: none;
