@@ -174,18 +174,20 @@ const TOKENS = `
   /* ---------- CATEGORY TILES (square cards, full-width label strip) ---------- */
   .gs-catchips { display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px; margin-bottom: 20px; scrollbar-width: thin; }
   .gs-catcard {
-    flex-shrink: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0;
-    width: 96px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px;
-    padding: 0; overflow: hidden; transition: border-color .15s ease, transform .15s ease;
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    width: 96px; background: transparent; border: none; border-radius: 0;
+    padding: 4px 0; overflow: visible; transition: transform .15s ease;
   }
-  .gs-catcard:hover { border-color: var(--gold); transform: translateY(-2px); }
-  .gs-catcard.active { border-color: var(--gold); box-shadow: 0 0 0 1.5px var(--gold); }
+  .gs-catcard:hover { transform: translateY(-2px); }
+  .gs-catcard.active { box-shadow: none; }
   .gs-catcard-ring {
-    width: 100%; height: 76px; padding: 0; background: #ddd6c4;
+    width: 84px; height: 84px; padding: 3px; border-radius: 50%; background: #ddd6c4;
     display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid transparent; transition: border-color .15s ease;
   }
+  .gs-catcard.active .gs-catcard-ring { border-color: var(--gold); }
   .gs-catcard-img {
-    width: 100%; height: 100%; border-radius: 0; overflow: hidden;
+    width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
     background: #ddd6c4; border: none;
     display: flex; align-items: center; justify-content: center;
   }
@@ -193,12 +195,10 @@ const TOKENS = `
   .gs-catcard-img svg { color: #a89f88; }
   .gs-catcard-label {
     font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-align: center;
-    color: #FFFFFF; line-height: 1.3; white-space: normal; word-break: break-word;
-    width: 100%; padding: 8px 6px; flex: 1;
-    display: flex; align-items: center; justify-content: center;
-    background: #072E4E;
+    color: var(--ink); line-height: 1.3; white-space: normal; word-break: break-word;
+    width: 100%; padding: 0 4px; background: none;
   }
-  .gs-catcard.active .gs-catcard-label { color: #FFFFFF; font-weight: 700; background: #041a2e; }
+  .gs-catcard.active .gs-catcard-label { color: var(--gold); font-weight: 700; }
 
   .gs-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px;
@@ -649,9 +649,9 @@ const TOKENS = `
     .gs-hero-track { min-height: 360px; }
     .gs-hero-slide-content { padding: 22px 20px 20px; }
     .gs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .gs-catcard { width: 82px; }
-    .gs-catcard-ring { height: 64px; }
-    .gs-catcard-label { font-size: 10px; max-width: 100%; padding: 6px 4px; min-height: 30px; }
+    .gs-catcard { width: 74px; }
+    .gs-catcard-ring { width: 68px; height: 68px; }
+    .gs-catcard-label { font-size: 9.5px; max-width: 100%; padding: 0; }
     .gs-card-name { font-size: 15px; }
     .gs-card-desc { display: none; }
     .gs-card-foot { flex-direction: column; align-items: stretch; gap: 8px; }
