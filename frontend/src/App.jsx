@@ -47,7 +47,7 @@ const TOKENS = `
     --muted: #5A7A86;
     --muted-2: #39586A;
     --line: rgba(7,46,78,0.14);
-    --gold: #C3944E;
+    --gold: #072E4E;
     --gold-ink: #072E4E;
     --green: #027F7B;
     --coral: #C6482F;
