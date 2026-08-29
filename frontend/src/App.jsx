@@ -1535,15 +1535,16 @@ function HeroCarousel() {
 // candidate image in order and only shows the icon once everything 404s,
 // so a missing file here never silently "wins" over a real product photo.
 const CATEGORY_IMAGES = {
-  "Ear Chain": "/categories/ear-chain.jpg",
-  "Chokers": "/categories/chokers.jpg",
-  "Temple Jewels": "/categories/temple-jewels.jpg",
-  "Designer Jewelry": "/categories/designer-jewelry.jpg",
+  "All": "/categories/all.jpeg",
+  "Ear Chain": "/categories/earchain.png",
+  "Chokers": "/categories/chokers.png",
+  "Temple Jewels": "/categories/tj.png",
+  "Designer Jewelry": "/categories/designer.png",
   "Hair Accessories": "/categories/hair-accessories.jpg",
-  "Anti-Tarnish Bracelets": "/categories/anti-tarnish-bracelets.jpg",
-  "Anti-Tarnish Chains": "/categories/anti-tarnish-chains.jpg",
-  "Bangles": "/categories/bangles.jpg",
-  "Earrings": "/categories/earrings.jpg",
+  "Anti-Tarnish Bracelets": "/categories/brace.png",
+  "Anti-Tarnish Chains": "/categories/atc.png",
+  "Bangles": "/categories/bangles.png",
+  "Earrings": "/categories/earrings.jpeg",
 };
 
 // `sources` is an ordered list of image URLs to try for this tile (e.g. the
@@ -1637,7 +1638,7 @@ function StoreView({ products, onAdd }) {
         <div className="gs-catchips">
           <CategoryTile
             label="All"
-            sources={[]}
+            sources={[CATEGORY_IMAGES["All"]]}
             active={category === "All"}
             onClick={() => { setCategory("All"); setPage(1); }}
           />
