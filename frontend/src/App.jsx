@@ -171,21 +171,8 @@ const TOKENS = `
   .gs-shoptab:hover { border-color: var(--gold); color: var(--ink); }
   .gs-shoptab.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
-  /* ---------- CATEGORY TILES (circular photo + plain label) ---------- */
-  .gs-catchips-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-  .gs-catchips {
-    display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px;
-    margin-bottom: 0; scrollbar-width: thin; justify-content: center; flex: 1;
-    scroll-behavior: smooth;
-  }
-  .gs-catchips-arrow {
-    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
-    background: var(--paper); color: var(--ink); display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  }
-  .gs-catchips-arrow:hover { border-color: var(--gold); color: var(--gold); }
-  .gs-catchips-arrow:disabled { opacity: 0.3; cursor: default; }
-
+  /* ---------- CATEGORY TILES (square cards, full-width label strip) ---------- */
+  .gs-catchips { display: flex; gap: 12px; flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px 16px; margin-bottom: 20px; scrollbar-width: thin; }
   .gs-catcard {
     flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
     width: 96px; background: transparent; border: none; border-radius: 0;
@@ -199,7 +186,7 @@ const TOKENS = `
     border: 2.5px solid transparent; transition: border-color .15s ease;
   }
   .gs-catcard:hover .gs-catcard-ring { border-color: #072E4E; }
-  .gs-catcard.active .gs-catcard-ring { border-color: var(--gold); }
+  .gs-catcard.active .gs-catcard-ring { border-color: #072E4E; }
   .gs-catcard-img {
     width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
     background: #ddd6c4; border: none;
@@ -663,7 +650,6 @@ const TOKENS = `
     .gs-hero-track { min-height: 360px; }
     .gs-hero-slide-content { padding: 22px 20px 20px; }
     .gs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .gs-catchips-arrow { display: none; }
     .gs-catcard { width: 74px; }
     .gs-catcard-ring { width: 68px; height: 68px; }
     .gs-catcard-label { font-size: 9.5px; max-width: 100%; padding: 0; }
@@ -1551,15 +1537,15 @@ function HeroCarousel() {
 // so a missing file here never silently "wins" over a real product photo.
 const CATEGORY_IMAGES = {
   "All": "/categories/all.jpeg",
-  "Ear Chain": "/categories/ear-chain.jpg",
-  "Chokers": "/categories/chokers.jpg",
-  "Temple Jewels": "/categories/temple-jewels.jpg",
-  "Designer Jewelry": "/categories/designer-jewelry.jpg",
+  "Ear Chain": "/categories/earchain.png",
+  "Chokers": "/categories/chokers.png",
+  "Temple Jewels": "/categories/tj.png",
+  "Designer Jewelry": "/categories/designer.png",
   "Hair Accessories": "/categories/hair-accessories.jpg",
-  "Anti-Tarnish Bracelets": "/categories/anti-tarnish-bracelets.jpg",
-  "Anti-Tarnish Chains": "/categories/anti-tarnish-chains.jpg",
-  "Bangles": "/categories/bangles.jpg",
-  "Earrings": "/categories/earrings.jpg",
+  "Anti-Tarnish Bracelets": "/categories/brace.png",
+  "Anti-Tarnish Chains": "/categories/atc.png",
+  "Bangles": "/categories/bangles.png",
+  "Earrings": "/categories/earrings.jpeg",
 };
 
 // `sources` is an ordered list of image URLs to try for this tile (e.g. the
@@ -1606,14 +1592,6 @@ function StoreView({ products, onAdd }) {
   const [page, setPage] = useState(1);
   // Product currently open in the quick-view / detail modal, or null when closed.
   const [previewProduct, setPreviewProduct] = useState(null);
-  // Ref to the scrollable category-chip row, so the arrow buttons can
-  // scroll it programmatically.
-  const catchipsRef = React.useRef(null);
-  function scrollCatchips(dir) {
-    const el = catchipsRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * 240, behavior: "smooth" });
-  }
 
   const rentableCount = products.filter((p) => p.listingType === "rent" || p.listingType === "both").length;
   const modeFiltered = products.filter((p) =>
@@ -1658,39 +1636,31 @@ function StoreView({ products, onAdd }) {
       </div>
 
       {categoriesInTab.length > 1 && (
-        <div className="gs-catchips-row">
-          <button className="gs-catchips-arrow" onClick={() => scrollCatchips(-1)} aria-label="Scroll categories left">
-            <ChevronLeft size={16} />
-          </button>
-          <div className="gs-catchips" ref={catchipsRef}>
-            <CategoryTile
-              label="All"
-              sources={[CATEGORY_IMAGES["All"]]}
-              active={category === "All"}
-              onClick={() => { setCategory("All"); setPage(1); }}
-            />
-            {categoriesInTab.map((c) => {
-              // Try the curated category photo first, then fall back to a
-              // real product photo from this category — either can 404
-              // independently and CategoryTile will move on to the next one.
-              const candidates = [
-                CATEGORY_IMAGES[c],
-                modeFiltered.find((p) => p.category === c)?.image,
-              ].filter(Boolean);
-              return (
-                <CategoryTile
-                  key={c}
-                  label={c}
-                  sources={candidates}
-                  active={category === c}
-                  onClick={() => { setCategory(c); setPage(1); }}
-                />
-              );
-            })}
-          </div>
-          <button className="gs-catchips-arrow" onClick={() => scrollCatchips(1)} aria-label="Scroll categories right">
-            <ChevronRight size={16} />
-          </button>
+        <div className="gs-catchips">
+          <CategoryTile
+            label="All"
+            sources={[CATEGORY_IMAGES["All"]]}
+            active={category === "All"}
+            onClick={() => { setCategory("All"); setPage(1); }}
+          />
+          {categoriesInTab.map((c) => {
+            // Try the curated category photo first, then fall back to a
+            // real product photo from this category — either can 404
+            // independently and CategoryTile will move on to the next one.
+            const candidates = [
+              CATEGORY_IMAGES[c],
+              modeFiltered.find((p) => p.category === c)?.image,
+            ].filter(Boolean);
+            return (
+              <CategoryTile
+                key={c}
+                label={c}
+                sources={candidates}
+                active={category === c}
+                onClick={() => { setCategory(c); setPage(1); }}
+              />
+            );
+          })}
         </div>
       )}
 
