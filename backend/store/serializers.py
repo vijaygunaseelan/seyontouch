@@ -34,10 +34,12 @@ class OrderSerializer(serializers.ModelSerializer):
     # accepted from the client.
     razorpayOrderId = serializers.CharField(source="razorpay_order_id", read_only=True)
     createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    shippingFee = serializers.IntegerField(source="shipping_fee", read_only=True)
 
     class Meta:
         model = Order
-        fields = ["id", "paymentId", "razorpayOrderId", "utr", "status", "customer", "items", "total", "createdAt"]
+        fields = ["id", "paymentId", "razorpayOrderId", "utr", "status", "customer", "items", "total", "discount", "shippingFee", "createdAt"]
+        read_only_fields = ["discount"]
 
 
 class OrderStatusUpdateSerializer(serializers.ModelSerializer):

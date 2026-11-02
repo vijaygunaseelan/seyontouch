@@ -5,7 +5,9 @@ Your order {{ order.id }} is confirmed and being packed. You can expect delivery
 ITEMS
 {% for item in items %}- {{ item.name }} x {{ item.qty }}{% if item.mode == "rent" %} ({{ item.days }}-day rental{% if item.startDate %}, from {{ item.startDate }}{% endif %}){% endif %} -- Rs.{{ item.line_total }}
 {% endfor %}
-Total paid: Rs.{{ order.total }}
+{% if order.discount %}Sale discount: -Rs.{{ order.discount }}
+{% endif %}{% if order.shipping_fee %}Shipping: Rs.{{ order.shipping_fee }}
+{% endif %}Total paid: Rs.{{ order.total }}
 
 DELIVERY ADDRESS
 {{ customer.name }}

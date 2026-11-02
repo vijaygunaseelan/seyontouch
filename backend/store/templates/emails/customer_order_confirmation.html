@@ -51,6 +51,14 @@
                   </td>
                 </tr>
                 {% endfor %}
+                {% if order.discount %}<tr>
+                  <td style="padding:10px 0; font-size:13px; color:#027F7B;">Sale discount</td>
+                  <td style="padding:10px 0; font-size:13px; color:#027F7B; text-align:right; white-space:nowrap;">&minus;&#8377;{{ order.discount }}</td>
+                </tr>{% endif %}
+                {% if order.shipping_fee %}<tr>
+                  <td style="padding:10px 0; font-size:13px; color:#072E4E;">Shipping</td>
+                  <td style="padding:10px 0; font-size:13px; color:#072E4E; text-align:right; white-space:nowrap;">&#8377;{{ order.shipping_fee }}</td>
+                </tr>{% endif %}
                 <tr>
                   <td style="padding:14px 0 4px; font-size:15px; font-weight:bold; color:#072E4E;">Total paid</td>
                   <td style="padding:14px 0 4px; font-size:15px; font-weight:bold; color:#072E4E; text-align:right;">&#8377;{{ order.total }}</td>

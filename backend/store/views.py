@@ -91,7 +91,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         # Re-price the cart server-side — never trust a client-sent price
         # or total. This is also the amount Razorpay Checkout will charge.
         try:
-            priced_items, amount_paise = price_cart(request.data.get("items", []))
+            priced_items, amount_paise, discount, shipping_fee = price_cart(request.data.get("items", []))
         except CartError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -120,7 +120,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
             data.pop("paymentId", None)
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            order = serializer.save()
+            # discount / shipping_fee are read-only on the serializer, so
+            # pass the server-computed values straight to save().
+            order = serializer.save(discount=discount, shipping_fee=shipping_fee)
 
             # Create the matching Razorpay order now, while we're still
             # inside the stock-locking transaction, so the amount Razorpay

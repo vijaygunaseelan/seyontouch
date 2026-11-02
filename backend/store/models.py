@@ -80,6 +80,10 @@ class Order(models.Model):
     customer = models.JSONField(default=dict)
     items = models.JSONField(default=list)
     total = models.PositiveIntegerField(default=0)
+    # Breakdown of what's baked into `total` (items subtotal - discount +
+    # shipping). Zero on orders placed before these fields existed.
+    discount = models.PositiveIntegerField(default=0)
+    shipping_fee = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

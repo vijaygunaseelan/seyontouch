@@ -15,6 +15,8 @@ CUSTOMER
 {% endif %}ITEMS
 {% for item in items %}- {{ item.name }} x {{ item.qty }}{% if item.mode == "rent" %} ({{ item.days }}-day rental){% endif %}{% if item.sku %} [SKU: {{ item.sku }}]{% endif %} -- Rs.{{ item.line_total }}
 {% endfor %}
-Total: Rs.{{ order.total }}
+{% if order.discount %}Sale discount: -Rs.{{ order.discount }}
+{% endif %}{% if order.shipping_fee %}Shipping: Rs.{{ order.shipping_fee }}
+{% endif %}Total: Rs.{{ order.total }}
 
 Manage this order from the admin panel at seyontouch.in/admin.

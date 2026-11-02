@@ -24,6 +24,19 @@ const SHIPPING_FEE = 60;
 const RENT_SHIPPING_FEE = 160;
 const FREE_SHIPPING_THRESHOLD = 599;
 
+// Limited-time sale: 3, 4 and 5 Nov 2026 (India time). Keep in sync with
+// PROMO_* in backend/store/pricing.py — the server is what actually charges.
+//   subtotal >= 1000 -> 5% off;  subtotal >= 1500 -> 5% off + free shipping
+const PROMO_START = new Date("2026-11-03T00:00:00+05:30");
+const PROMO_END = new Date("2026-11-06T00:00:00+05:30"); // exclusive
+const PROMO_DISCOUNT_THRESHOLD = 1000;
+const PROMO_FREE_SHIPPING_THRESHOLD = 1500;
+const PROMO_DISCOUNT_PERCENT = 5;
+function isPromoActive() {
+  const now = new Date();
+  return now >= PROMO_START && now < PROMO_END;
+}
+
 // Store contact details shown in the site footer.
 const STORE_PHONE = "9611975252";
 const STORE_EMAIL = "seyontouch@gmail.com";
@@ -920,15 +933,26 @@ export default function GeneralStoreApp() {
   // fee; anything with at least one bought item — or an empty cart — falls
   // back to the regular fee. Once the subtotal reaches
   // FREE_SHIPPING_THRESHOLD, shipping is waived entirely regardless of mode.
+  const promoActive = isPromoActive();
+  const discount =
+    promoActive && subtotal >= PROMO_DISCOUNT_THRESHOLD
+      ? Math.round((subtotal * PROMO_DISCOUNT_PERCENT) / 100)
+      : 0;
   const shippingFee =
     cartItems.length === 0
       ? 0
-      : subtotal >= FREE_SHIPPING_THRESHOLD
+      : subtotal >= FREE_SHIPPING_THRESHOLD ||
+        (promoActive && subtotal >= PROMO_FREE_SHIPPING_THRESHOLD)
       ? 0
       : cartItems.every((i) => i.mode === "rent")
       ? RENT_SHIPPING_FEE
       : SHIPPING_FEE;
   const amountToFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+  const amountToPromoDiscount =
+    promoActive && subtotal < PROMO_DISCOUNT_THRESHOLD
+      ? PROMO_DISCOUNT_THRESHOLD - subtotal
+      : 0;
+  const grandTotal = subtotal - discount + shippingFee;
 
   function cartQtyForProduct(productId) {
     return Object.values(cart)
@@ -1080,7 +1104,7 @@ export default function GeneralStoreApp() {
         sku: i.sku,
         image: i.image,
       })),
-      total: subtotal + shippingFee,
+      total: grandTotal,
     };
     try {
       const order = await api.createOrder(orderPayload);
@@ -1340,6 +1364,10 @@ export default function GeneralStoreApp() {
             items={cartItems}
             subtotal={subtotal}
             shippingFee={shippingFee}
+            discount={discount}
+            grandTotal={grandTotal}
+            promoActive={promoActive}
+            amountToPromoDiscount={amountToPromoDiscount}
             amountToFreeShipping={amountToFreeShipping}
             onClose={() => setCartOpen(false)}
             onChangeQty={changeQty}
@@ -1370,7 +1398,7 @@ export default function GeneralStoreApp() {
             )}
             {checkoutStage === "payment" && razorpayConfig && (
               <RazorpayPaymentCard
-                total={subtotal + shippingFee}
+                total={grandTotal}
                 onPay={payNow}
                 paying={paying}
                 onBack={backToAddress}
@@ -2113,7 +2141,7 @@ function StoreFooter({ onNavigate }) {
 }
 
 /* ---------------- CART ---------------- */
-function CartDrawer({ items, subtotal, shippingFee, amountToFreeShipping, onClose, onChangeQty, onRemove, onCheckout }) {
+function CartDrawer({ items, subtotal, shippingFee, discount, grandTotal, promoActive, amountToPromoDiscount, amountToFreeShipping, onClose, onChangeQty, onRemove, onCheckout }) {
   return (
     <div className="gs-drawer">
       <div className="gs-drawer-head">
@@ -2160,6 +2188,13 @@ function CartDrawer({ items, subtotal, shippingFee, amountToFreeShipping, onClos
       </div>
       {items.length > 0 && (
         <div className="gs-drawer-foot">
+          {promoActive && (
+            <div className="gs-freeship-note">
+              {discount > 0
+                ? `🎉 Sale: 5% off applied (−${inr(discount)})`
+                : `Sale (till 5 Nov): add ${inr(amountToPromoDiscount)} more for 5% off`}
+            </div>
+          )}
           {amountToFreeShipping > 0 ? (
             <div className="gs-freeship-note">
               Add {inr(amountToFreeShipping)} more to get free shipping
@@ -2168,8 +2203,11 @@ function CartDrawer({ items, subtotal, shippingFee, amountToFreeShipping, onClos
             <div className="gs-freeship-note">🎉 You've unlocked free shipping!</div>
           )}
           <div className="gs-totalrow"><span>Subtotal</span><span>{inr(subtotal)}</span></div>
+          {discount > 0 && (
+            <div className="gs-totalrow"><span>Sale discount (5%)</span><span>−{inr(discount)}</span></div>
+          )}
           <div className="gs-totalrow"><span>Shipping</span><span>{shippingFee === 0 ? "Free" : inr(shippingFee)}</span></div>
-          <div className="gs-totalrow grand"><span>Total</span><span>{inr(subtotal + shippingFee)}</span></div>
+          <div className="gs-totalrow grand"><span>Total</span><span>{inr(grandTotal)}</span></div>
           <button className="gs-checkoutbtn" onClick={onCheckout}>
             Proceed to Buy
           </button>
@@ -2370,6 +2408,12 @@ function SuccessCard({ order, onDone }) {
               <span>{inr(i.price * i.qty)}</span>
             </div>
           ))}
+          {order.discount > 0 && (
+            <div className="gs-receipt-row"><span>Sale discount</span><span>−{inr(order.discount)}</span></div>
+          )}
+          {order.shippingFee > 0 && (
+            <div className="gs-receipt-row"><span>Shipping</span><span>{inr(order.shippingFee)}</span></div>
+          )}
           <div className="gs-receipt-row total"><span>{pending ? "Total" : "Total paid"}</span><span>{inr(order.total)}</span></div>
         </div>
         <button className="gs-checkoutbtn" style={{ marginTop: 0 }} onClick={onDone}>Continue shopping</button>
