@@ -1477,7 +1477,7 @@ const HERO_SLIDES = [
     eyebrow: "Celebrate Diwali with Exclusive Offers!",
     title: "This Diwali, Shine Brighter for Less!",
     text: "Make your festive season extra special with 5% OFF on purchases above ₹1,000, plus FREE SHIPPING on orders above ₹1,500. Grab your Special Mystery Jar for just ₹999! Hurry, offers valid only on November 3 & 4. ✨",
-    bg: 'url("https://user23766.na.imgto.link/public/20261103/5f9aefc65d3c3ebe41fe31a1-elegant-diwali-mystery-jar-offer.avif")',
+    bg: 'url("https://user23766.na.imgto.link/public/20261103/8246aefdaefd92ae2d91784b-seyon-touch-diwali-mystery-jar-offer.avif")',
   },
   {
     eyebrow: "Shop the collection",
