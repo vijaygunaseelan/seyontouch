@@ -943,10 +943,10 @@ export default function GeneralStoreApp() {
       ? 0
       : subtotal >= FREE_SHIPPING_THRESHOLD ||
         (promoActive && subtotal >= PROMO_FREE_SHIPPING_THRESHOLD)
-      ? 0
-      : cartItems.every((i) => i.mode === "rent")
-      ? RENT_SHIPPING_FEE
-      : SHIPPING_FEE;
+        ? 0
+        : cartItems.every((i) => i.mode === "rent")
+          ? RENT_SHIPPING_FEE
+          : SHIPPING_FEE;
   const amountToFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
   const amountToPromoDiscount =
     promoActive && subtotal < PROMO_DISCOUNT_THRESHOLD
@@ -1412,7 +1412,7 @@ export default function GeneralStoreApp() {
         </>
       )}
 
-      
+
       {loginOpen && (
         <>
           <div className="gs-overlay" onClick={cancelAdminLogin} />
@@ -1473,6 +1473,12 @@ export default function GeneralStoreApp() {
 // size/aspect ratio the photo is, CSS `background-size: cover` on
 // .gs-hero-slide crops it to fill the banner, so any resolution works.
 const HERO_SLIDES = [
+  {
+    eyebrow: "Celebrate Diwali with Exclusive Offers!",
+    title: "This Diwali, Shine Brighter for Less!",
+    text: "Make your festive season extra special with 5% OFF on purchases above ₹1,000, plus FREE SHIPPING on orders above ₹1,500. Grab your Special Mystery Jar for just ₹999! Hurry, offers valid only on November 3 & 4. ✨",
+    bg: 'url("https://user23766.na.imgto.link/public/20261103/5f9aefc65d3c3ebe41fe31a1-elegant-diwali-mystery-jar-offer.avif")',
+  },
   {
     eyebrow: "Shop the collection",
     title: "Small, well-made things.",
@@ -2468,8 +2474,8 @@ function AdminView({ products, orders, adminTab, setAdminTab, onAdd, onEdit, onL
                   {p.listingType === "rent"
                     ? `${inr(p.rentPrice)}/day`
                     : p.listingType === "both"
-                    ? `${inr(p.price)} · ${inr(p.rentPrice)}/day`
-                    : inr(p.price)}
+                      ? `${inr(p.price)} · ${inr(p.rentPrice)}/day`
+                      : inr(p.price)}
                 </div>
                 <div className="gs-row-price" style={{ color: p.stock === 0 ? "#E0654F" : "inherit" }}>{p.stock} in stock</div>
                 <div className="gs-row-actions">
